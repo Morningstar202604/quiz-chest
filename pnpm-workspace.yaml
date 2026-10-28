@@ -1,0 +1,8 @@
+onlyBuiltDependencies:
+  - esbuild
+minimumReleaseAgeExclude:
+  - lucide-react@1.63.0
+  - react-router-dom@7.18.5
+  - react-router@7.18.5
+allowBuilds:
+  esbuild: true

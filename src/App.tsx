@@ -17,7 +17,7 @@ const StatsPage = lazy(() =>
 )
 
 // 原生壳（Tauri / Capacitor）用 hash 路由，避免本地静态服务器缺少 SPA 回退。
-const Router = import.meta.env.VITE_ROUTER === 'hash' ? HashRouter : BrowserRouter
+const Router = import.meta.env.MODE === 'native' ? HashRouter : BrowserRouter
 
 export function App() {
   return (

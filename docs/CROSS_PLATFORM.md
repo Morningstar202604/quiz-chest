@@ -5,7 +5,7 @@
 ```
 src/ + public/           一份源码
         │
-        ├─ npm run build ──► dist/ ──► 任意静态托管（Web / PWA）
+        ├─ pnpm build ──────► dist/ ──► 任意静态托管（Web / PWA）
         ├─ Tauri 2 ────────► Windows / macOS / Linux 安装包
         └─ Capacitor 8 ────► Android APK / AAB（iOS 同理）
 ```
@@ -55,7 +55,7 @@ pnpm tauri init
 ```json
 {
   "build": {
-    "beforeBuildCommand": "cross-env VITE_ROUTER=hash pnpm build",
+    "beforeBuildCommand": "pnpm build:native",
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../dist"
@@ -101,7 +101,7 @@ pnpm tauri build    # 产出安装包
 pnpm add @capacitor/core@8 @capacitor/android@8
 pnpm add -D @capacitor/cli@8
 npx cap init "题屿" "com.tiyu.questionbank" --web-dir dist
-VITE_ROUTER=hash pnpm build
+pnpm build:native
 npx cap add android
 npx cap sync android
 npx cap open android
@@ -133,7 +133,7 @@ cd android
 ./gradlew bundleRelease          # 上架包：app/build/outputs/bundle/release/app-release.aab
 ```
 
-日常改动后的同步流程：`VITE_ROUTER=hash pnpm build && npx cap sync android`。
+日常改动后的同步流程：`pnpm build:native && npx cap sync android`。
 
 移动端注意事项：
 

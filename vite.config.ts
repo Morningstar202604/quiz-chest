@@ -3,10 +3,11 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     VitePWA({
+      disable: mode === 'native',
       registerType: 'autoUpdate',
       includeAssets: ['icons/favicon.svg', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
@@ -64,4 +65,4 @@ export default defineConfig({
   },
   server: { port: 5173, host: true },
   preview: { port: 4173, host: true },
-})
+}))
