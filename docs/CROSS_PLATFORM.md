@@ -1,0 +1,177 @@
+# 跨端方案：一套代码，三端运行
+
+本项目是纯前端单页应用（React 19 + TypeScript + Vite），构建产物是静态文件，因此可以用同一份代码分别封装成 Web、桌面应用和 Android App。
+
+```
+src/ + public/           一份源码
+        │
+        ├─ npm run build ──► dist/ ──► 任意静态托管（Web / PWA）
+        ├─ Tauri 2 ────────► Windows / macOS / Linux 安装包
+        └─ Capacitor 8 ────► Android APK / AAB（iOS 同理）
+```
+
+## 一、方案对比（为什么选 Tauri + Capacitor）
+
+| 维度 | Tauri 2（桌面） | Capacitor 8（移动） | Electron | React Native / Flutter |
+| --- | --- | --- | --- | --- |
+| 复用本仓库 UI | 直接加载 `dist/`，零改动 | 直接加载 `dist/`，零改动 | 直接加载，零改动 | 需要重写 UI |
+| 安装包体积 | 约 3–10 MB | 约 5–8 MB 壳 + WebView | 约 90–150 MB | 约 15–40 MB |
+| 安卓支持 | 无 | 原生支持 | 无 | 支持 |
+| 系统 WebView | 系统 WebView（Win: WebView2） | 系统 WebView | 自带 Chromium | 自绘引擎 |
+| 学习成本 | 低（Rust 仅构建期） | 低（JS/TS） | 中 | 高 |
+| 结论 | 桌面首选 | 安卓首选 | 体积过大 | 需重写，放弃 |
+
+本仓库已内置 PWA（`vite-plugin-pwa`），所以第三条路线「浏览器安装到桌面/手机桌面」开箱即用，不需要任何额外构建。
+
+## 二、Web / PWA（已完成）
+
+```bash
+pnpm install
+pnpm build          # 产出 dist/
+pnpm preview        # 本地预览 http://localhost:4173
+```
+
+部署时把 `dist/` 交给任意静态服务器即可。`dist/sw.js` 与 `dist/manifest.webmanifest` 已生成，浏览器访问后可「安装到桌面」或「添加到主屏幕」，离线可用。
+
+注意：SPA 需要把未知路径回退到 `index.html`。Nginx 示例：
+
+```nginx
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
+
+## 三、桌面端（Tauri 2）
+
+前置：Rust 工具链（`rustup`）、Windows 需 WebView2（Win10/11 自带）、Node 20+。
+
+```bash
+pnpm add -D @tauri-apps/cli@2
+pnpm tauri init
+```
+
+`src-tauri/tauri.conf.json` 关键配置：
+
+```json
+{
+  "build": {
+    "beforeBuildCommand": "cross-env VITE_ROUTER=hash pnpm build",
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "题屿 · 万象题库",
+        "width": 1280,
+        "height": 860,
+        "minWidth": 960,
+        "minHeight": 640
+      }
+    ]
+  },
+  "bundle": {
+    "identifier": "com.tiyu.questionbank",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.ico", "icons/icon.icns"]
+  }
+}
+```
+
+打包命令：
+
+```bash
+pnpm tauri dev      # 开发热更新
+pnpm tauri build    # 产出安装包
+```
+
+产物位置：`src-tauri/target/release/bundle/`（Windows 为 `.msi` / `.exe`，macOS 为 `.dmg`，Linux 为 `.deb` / `.AppImage`）。
+
+桌面端注意事项：
+
+1. 原生壳构建时设置 `VITE_ROUTER=hash`（见 `src/App.tsx`），改用 `HashRouter`，避免本地静态服务器缺少 SPA 回退导致深层路由 404。Web 部署保持默认的 `BrowserRouter`。
+2. 本地数据存于 WebView 的 localStorage，卸载应用即丢失。需要持久化到文件时，接 Tauri 的 `@tauri-apps/plugin-store`，把 `useAppStore` 的 `persist` storage 换成插件实现。
+3. 想加系统托盘、开机启动、自动更新，均在 `src-tauri` 内配置，不影响前端代码。
+
+## 四、Android（Capacitor 8）
+
+前置：Android Studio + Android SDK（API 35）、JDK 21（本机 `C:\Dev\jdk-21`）、Gradle。
+
+```bash
+pnpm add @capacitor/core@8 @capacitor/android@8
+pnpm add -D @capacitor/cli@8
+npx cap init "题屿" "com.tiyu.questionbank" --web-dir dist
+VITE_ROUTER=hash pnpm build
+npx cap add android
+npx cap sync android
+npx cap open android
+```
+
+`capacitor.config.ts`：
+
+```ts
+import type { CapacitorConfig } from '@capacitor/cli'
+
+const config: CapacitorConfig = {
+  appId: 'com.tiyu.questionbank',
+  appName: '题屿',
+  webDir: 'dist',
+  android: {
+    allowMixedContent: false,
+    backgroundColor: '#f4f0e7',
+  },
+}
+
+export default config
+```
+
+构建 APK：
+
+```bash
+cd android
+./gradlew assembleDebug          # 调试包：app/build/outputs/apk/debug/app-debug.apk
+./gradlew bundleRelease          # 上架包：app/build/outputs/bundle/release/app-release.aab
+```
+
+日常改动后的同步流程：`VITE_ROUTER=hash pnpm build && npx cap sync android`。
+
+移动端注意事项：
+
+1. 顶部状态栏与底部手势区：已在 `src/styles/layout.css`、`practice.css` 使用 `env(safe-area-inset-bottom)` 预留安全区。
+2. Android 返回键默认会退出应用。需要「返回上一页」时安装 `@capacitor/app`，监听 `backButton` 事件并调用 `history.back()`。
+3. 若后续接后端，需要在 `capacitor.config.ts` 的 `server.allowNavigation` 里放行 API 域名，或改用 `@capacitor/http`。
+4. 状态栏配色可用 `@capacitor/status-bar` 跟随主题切换。
+
+## 五、iOS（可选，同一套 Capacitor 工程）
+
+```bash
+pnpm add @capacitor/ios@8
+npx cap add ios
+npx cap open ios
+```
+
+需要 macOS + Xcode 才能编译，代码与安卓完全共用。
+
+## 六、数据与后端演进
+
+当前是「本地优先」架构：
+
+- 题库：静态 TypeScript 数据（`src/data/`），构建期打包，离线可用。
+- 学习数据：`localStorage`（zustand persist，键名 `tiyu-store-v1`，含版本迁移）。
+
+后续接后端时的最小改动路径：
+
+1. 新增 `src/services/` 层，封装题库拉取、作答上报、错题同步接口，组件不直接 fetch。
+2. `src/data/index.ts` 的同步导出改为异步加载 + 缓存，页面增加 loading / error 态（现有组件已支持空态）。
+3. 登录后把 `wrongBook` / `history` / `daily` 改为服务端数据 + 本地缓存，`useAppStore` 的 persist 仅保留设置项。
+
+## 七、质量门禁
+
+```bash
+pnpm typecheck     # tsc -b
+pnpm lint          # eslint .
+pnpm test          # vitest run（题库完整性 + 判分 + 统计 + 搜索）
+pnpm build         # 生产构建 + PWA 生成
+```
+
+三端共用同一套门禁：桌面与安卓壳只负责加载 `dist/`，不改变前端行为，因此 Web 端验证通过即代表壳内行为一致（系统返回键、状态栏等平台差异除外）。
