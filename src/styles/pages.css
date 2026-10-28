@@ -1115,8 +1115,8 @@
 .domain-hero-mark {
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 58px;
+  width: 74px;
+  height: 74px;
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--domain-accent) 12%, var(--paper-raised));
   color: var(--domain-accent);
@@ -1124,8 +1124,28 @@
 }
 
 .domain-hero-mark svg {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
+}
+
+.domain-hero {
+  position: relative;
+  padding-top: 14px;
+}
+
+.domain-hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--domain-accent),
+    color-mix(in srgb, var(--domain-accent) 8%, transparent) 60%,
+    transparent
+  );
 }
 
 .domain-hero-text {

@@ -14,6 +14,7 @@ export function FavoritesPage() {
   const questions = favorites
     .map((id) => getQuestion(id))
     .filter((question): question is NonNullable<typeof question> => Boolean(question))
+    .reverse()
 
   if (questions.length === 0) {
     return (

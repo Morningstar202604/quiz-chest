@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar, MobileNav } from './Sidebar'
 import { SearchDialog } from '../search/SearchDialog'
 import { useAppStore } from '../../store/useAppStore'
+import { domains } from '../../data/taxonomy'
 import { Menu, Moon, Search, Sun, X } from '../ui/icons'
 
 const pageTitles: Record<string, string> = {
@@ -17,9 +18,13 @@ const pageTitles: Record<string, string> = {
 
 function resolveTitle(pathname: string): string {
   if (pageTitles[pathname]) return pageTitles[pathname]
-  if (pathname.startsWith('/domain/')) return '领域题库'
+  if (pathname.startsWith('/domain/')) {
+    const domainId = pathname.split('/')[2] ?? ''
+    return domains.find((domain) => domain.id === domainId)?.name ?? '领域题库'
+  }
   if (pathname.startsWith('/collection/')) return '题库详情'
   if (pathname.startsWith('/practice/')) return '答题练习'
+  if (pathname.startsWith('/result/')) return '练习结果'
   return '题屿'
 }
 

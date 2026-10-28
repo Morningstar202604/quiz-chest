@@ -33,6 +33,7 @@ pnpm preview      # 预览构建产物 http://localhost:4173
 | `pnpm typecheck` | `tsc -b` |
 | `pnpm lint` | ESLint |
 | `pnpm test` | Vitest 单元测试 |
+| `pnpm check` | 依次执行 typecheck → lint → test → build |
 
 ## 分类设计
 
