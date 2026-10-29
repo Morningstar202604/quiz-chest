@@ -1113,40 +1113,6 @@
   flex: none;
 }
 
-.tree-track-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 8px;
-  margin: 16px 0 4px;
-}
-
-.tree-track-chip {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 11px 13px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  text-align: left;
-  background: color-mix(in srgb, var(--paper-raised) 55%, transparent);
-  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
-}
-
-.tree-track-chip:hover {
-  border-color: var(--line-strong);
-  background: var(--paper-raised);
-}
-
-.tree-track-chip strong {
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.tree-track-chip span {
-  font-size: 10px;
-  color: var(--ink-muted);
-}
-
 .tree-collections {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -1447,28 +1413,91 @@
   .tree-nav {
     position: static;
     flex-direction: row;
-    flex-wrap: wrap;
-    padding: 0 0 12px;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 0 0 10px;
     border-right: none;
     border-bottom: 1px solid var(--line);
-    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tree-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .tree-nav-label {
-    width: 100%;
-    padding-bottom: 2px;
+    display: none;
   }
 
   .tree-group {
-    width: 100%;
+    flex-direction: column;
+    width: auto;
+    flex: none;
+  }
+
+  .tree-domain {
+    width: auto;
+    white-space: nowrap;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    padding: 6px 11px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+  }
+
+  .tree-domain svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .tree-domain.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    box-shadow: none;
+  }
+
+  .tree-count {
+    margin-left: 2px;
   }
 
   .tree-tracks {
+    display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    gap: 5px;
+    margin: 6px 0 0;
+    padding: 0;
     border-left: none;
-    padding-left: 0;
-    margin-left: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tree-tracks::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tree-track {
+    white-space: nowrap;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    padding: 3px 10px;
+    font-size: 11px;
+    background: transparent;
+  }
+
+  .tree-track.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+  }
+
+  .tree-domain-head .text-link {
+    display: none;
+  }
+
+  .tree-domain-head {
+    padding-bottom: 14px;
   }
 
   .goal-timeline-item {
