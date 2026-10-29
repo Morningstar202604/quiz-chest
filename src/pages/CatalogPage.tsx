@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { questionBank } from '../data'
-import { collections, domains, tracksOfDomain } from '../data/taxonomy'
+import { useLibraryCollections } from '../lib/library'
+import { domains, tracksOfDomain } from '../data/taxonomy'
+import type { Domain, IconKey } from '../data/types'
 import { DomainIcon } from '../components/ui/icons'
 import { Badge, EmptyState } from '../components/ui/primitives'
 import { ChevronRight, Clock, Library, Search } from '../components/ui/icons'
 
 export function CatalogPage() {
+  const library = useLibraryCollections()
   const [domainFilter, setDomainFilter] = useState<string>(domains[0].id)
   const [trackFilter, setTrackFilter] = useState<string>('all')
   const [query, setQuery] = useState('')
@@ -17,7 +19,7 @@ export function CatalogPage() {
 
   const domainId = domain.id
 
-  const matched = questionBank.filter((collection) => {
+  const matched = library.filter((collection) => {
     if (collection.domainId !== domainId) return false
     if (trackFilter !== 'all' && collection.trackId !== trackFilter) return false
     if (!keyword) return true
@@ -29,7 +31,7 @@ export function CatalogPage() {
 
   const searchHits = !keyword
     ? []
-    : questionBank
+    : library
         .filter((collection) =>
           [collection.title, collection.subtitle, collection.exam, ...collection.tags]
             .join(' ')
@@ -39,7 +41,7 @@ export function CatalogPage() {
         .slice(0, 8)
 
   const countOfTrack = (trackId: string) =>
-    collections.filter((item) => item.domainId === domain.id && item.trackId === trackId).length
+    library.filter((item) => item.domainId === domain.id && item.trackId === trackId).length
 
   return (
     <div className="tree-page">
@@ -107,9 +109,16 @@ export function CatalogPage() {
         <div className="tree-layout">
           <nav className="tree-nav" aria-label="领域与学段">
             <span className="tree-nav-label">领域</span>
-            {domains.map((item) => {
+            {[...domains, ...(library.some((item) => item.domainId === 'imported')
+              ? [{
+                  id: 'imported' as Domain['id'],
+                  name: '我的题库',
+                  icon: 'book' as IconKey,
+                  accent: '#7A5C2E',
+                }]
+              : [])].map((item) => {
               const active = item.id === domain.id
-              const owned = collections.filter((collection) => collection.domainId === item.id)
+              const owned = library.filter((collection) => collection.domainId === item.id)
               return (
                 <div key={item.id} className="tree-group">
                   <button
@@ -201,6 +210,11 @@ export function CatalogPage() {
                         </span>
                         {track ? <Badge tone="neutral">{track.name}</Badge> : null}
                         <Badge tone="neutral">{collection.level}</Badge>
+                        {collection.origin === 'builtin' ? (
+                          <Badge tone="gold" outline>
+                            示例
+                          </Badge>
+                        ) : null}
                       </div>
                       <h3 className="serif">{collection.title}</h3>
                       <p>{collection.subtitle}</p>
@@ -227,7 +241,21 @@ export function CatalogPage() {
 
 export function DomainPage() {
   const { domainId = '' } = useParams()
-  const domain = domains.find((item) => item.id === domainId)
+  const library = useLibraryCollections()
+  const importedDomain: Domain | null =
+    domainId === 'imported' && library.some((item) => item.domainId === 'imported')
+      ? {
+          id: 'imported',
+          name: '我的题库',
+          en: 'My Bank',
+          tagline: '导入与自建',
+          description: '你自己导入的题库，数据保存在本机，可随时删除。',
+          icon: 'book',
+          accent: '#7A5C2E',
+          index: 'MY',
+        }
+      : null
+  const domain = importedDomain ?? domains.find((item) => item.id === domainId)
   if (!domain) {
     return (
       <EmptyState
@@ -243,8 +271,10 @@ export function DomainPage() {
     )
   }
 
-  const owned = questionBank.filter((collection) => collection.domainId === domain.id)
-  const tracks = tracksOfDomain(domain.id)
+  const owned = library.filter((collection) => collection.domainId === domain.id)
+  const tracks = domain.id === 'imported'
+    ? [{ id: 'imported', domainId: 'imported' as const, name: '全部导入', short: '导入', description: '所有导入的题库' }]
+    : tracksOfDomain(domain.id)
   const count = owned.reduce((sum, item) => sum + item.questions.length, 0)
 
   return (
@@ -273,7 +303,9 @@ export function DomainPage() {
       </header>
 
       {tracks.map((track) => {
-        const inTrack = owned.filter((collection) => collection.trackId === track.id)
+        const inTrack = domain.id === 'imported'
+          ? owned
+          : owned.filter((collection) => collection.trackId === track.id)
         if (inTrack.length === 0) return null
         return (
           <section className="domain-track" key={track.id}>
@@ -295,6 +327,11 @@ export function DomainPage() {
                       <DomainIcon name={collection.icon} />
                     </span>
                     <Badge tone="neutral">{collection.level}</Badge>
+                    {collection.origin === 'builtin' ? (
+                      <Badge tone="gold" outline>
+                        示例
+                      </Badge>
+                    ) : null}
                   </div>
                   <h3>{collection.title}</h3>
                   <p>{collection.subtitle}</p>

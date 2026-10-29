@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useAppStore } from '../store/useAppStore'
 import { lastNDays, percent, streakFromDates } from '../lib/quiz'
-import { collections, domains } from '../data/taxonomy'
+import { getLibraryCollections } from '../lib/library'
+import { domains } from '../data/taxonomy'
 import { EChart } from '../components/charts/EChart'
 import { EmptyState, ProgressBar, Stat } from '../components/ui/primitives'
 import { BarChart3, Clock, Flame, Target, TrendingUp, Trophy } from '../components/ui/icons'
@@ -47,18 +48,27 @@ export function StatsPage() {
 
   const domainStats = useMemo(() => {
     const counts = new Map<string, number>()
+    const accentOf = new Map<string, string>()
+    for (const collection of getLibraryCollections()) {
+      accentOf.set(collection.domainId, collection.accent)
+    }
     for (const entry of history) {
-      const collection = collections.find((item) => item.id === entry.collectionId)
+      const collection = getLibraryCollections().find((item) => item.id === entry.collectionId)
       if (!collection) continue
       counts.set(collection.domainId, (counts.get(collection.domainId) ?? 0) + entry.answered)
     }
-    return domains
+    const importedCount = counts.get('imported') ?? 0
+    const rows = domains
       .map((domain) => ({
         name: domain.name,
         value: counts.get(domain.id) ?? 0,
         color: domain.accent,
       }))
       .filter((item) => item.value > 0)
+    if (importedCount > 0) {
+      rows.unshift({ name: '我的题库', value: importedCount, color: accentOf.get('imported') ?? '#7A5C2E' })
+    }
+    return rows
   }, [history])
 
   const accuracySeries = useMemo(() => {

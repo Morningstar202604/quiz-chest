@@ -26,6 +26,7 @@ export function PracticePage() {
       title={collection.title}
       subtitle={collection.exam}
       mode={mode}
+      timeLimitSec={mode === 'exam' ? collection.durationMin * 60 : undefined}
       historyCollectionId={collection.id}
       historyTitle={collection.title}
       historyDomainId={collection.domainId}

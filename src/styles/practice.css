@@ -59,6 +59,12 @@
   height: 13px;
 }
 
+.practice-timer.timer-critical {
+  color: var(--danger, #a8442a);
+  border-color: var(--danger, #a8442a);
+  font-weight: 700;
+}
+
 .practice-progress {
   position: sticky;
   top: calc(var(--header-h) - 22px);

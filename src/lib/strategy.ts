@@ -1,8 +1,12 @@
-import { questionBank } from '../data'
 import { collections, domains, tracksOfDomain } from '../data/taxonomy'
 import type { Question } from '../data/types'
 import type { WrongEntry } from '../store/useAppStore'
 import { shuffle } from './quiz'
+import { getLibraryCollections } from './library'
+
+function allQuestionsIncludingImported(): Question[] {
+  return getLibraryCollections().flatMap((collection) => collection.questions)
+}
 
 export type StrategyKind = 'daily' | 'weak' | 'random' | 'wrong'
 
@@ -61,35 +65,58 @@ export const strategyCatalog: StrategyMeta[] = [
 const DAILY_SIZE = 10
 
 export function collectAllQuestions(): Question[] {
-  return questionBank.flatMap((collection) => collection.questions)
+  return allQuestionsIncludingImported()
 }
 
 export function domainAccuracy(
   history: Array<{ collectionId: string; answered: number; correct: number }>,
 ): Array<{ domainId: string; name: string; answered: number; correct: number; accuracy: number }> {
   const bucket = new Map<string, { answered: number; correct: number }>()
+  let importedAnswered = 0
+  let importedCorrect = 0
   for (const entry of history) {
     const collection = collections.find((item) => item.id === entry.collectionId)
-    if (!collection) continue
+    if (!collection) {
+      if (entry.collectionId.startsWith('plan:') || entry.collectionId.includes('-')) {
+        importedAnswered += entry.answered
+        importedCorrect += entry.correct
+      }
+      continue
+    }
     const current = bucket.get(collection.domainId) ?? { answered: 0, correct: 0 }
     bucket.set(collection.domainId, {
       answered: current.answered + entry.answered,
       correct: current.correct + entry.correct,
     })
   }
-  return domains
-    .map((domain) => {
-      const stats = bucket.get(domain.id) ?? { answered: 0, correct: 0 }
-      return {
-        domainId: domain.id,
-        name: domain.name,
-        answered: stats.answered,
-        correct: stats.correct,
-        accuracy: stats.answered === 0 ? -1 : Math.round((stats.correct / stats.answered) * 100),
-      }
-    })
-    .filter((item) => item.answered > 0)
-    .sort((a, b) => a.accuracy - b.accuracy)
+  if (importedAnswered > 0) {
+    bucket.set('imported', { answered: importedAnswered, correct: importedCorrect })
+  }
+  const importedStats = bucket.get('imported')
+  const importedPart = importedStats && importedStats.answered > 0
+    ? [{
+        domainId: 'imported' as const,
+        name: '我的题库',
+        answered: importedStats.answered,
+        correct: importedStats.correct,
+        accuracy: Math.round((importedStats.correct / importedStats.answered) * 100),
+      }]
+    : []
+  return [
+    ...domains
+      .map((domain) => {
+        const stats = bucket.get(domain.id) ?? { answered: 0, correct: 0 }
+        return {
+          domainId: domain.id,
+          name: domain.name,
+          answered: stats.answered,
+          correct: stats.correct,
+          accuracy: stats.answered === 0 ? -1 : Math.round((stats.correct / stats.answered) * 100),
+        }
+      })
+      .filter((item) => item.answered > 0),
+    ...importedPart,
+  ].sort((a, b) => a.accuracy - b.accuracy)
 }
 
 function pickByDomain(counts: Record<string, number>, random: () => number, size: number): Question[] {
@@ -104,7 +131,7 @@ function pickByDomain(counts: Record<string, number>, random: () => number, size
     if (picked.length >= size) break
     const quota = Math.max(1, Math.round((counts[domainId] / Math.max(1, totalWeight)) * size))
     const pools = shuffle(
-      questionBank.filter((collection) => collection.domainId === domainId),
+      getLibraryCollections().filter((collection) => collection.domainId === domainId),
       random,
     ).map((collection) => ({
       questions: shuffle(collection.questions, random),
@@ -187,7 +214,7 @@ export function buildWeaknessPlan(options: {
     }
   }
   const target = weak.slice(0, 2).map((item) => item.domainId)
-  const pool = questionBank
+  const pool = getLibraryCollections()
     .filter((collection) => target.includes(collection.domainId))
     .flatMap((collection) => collection.questions)
   return {

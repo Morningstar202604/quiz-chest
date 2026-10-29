@@ -2,13 +2,15 @@ import { Link } from 'react-router-dom'
 import { useAppStore } from '../store/useAppStore'
 import { collections } from '../data/taxonomy'
 import { totalQuestions } from '../data'
-import { ArrowRight, Menu, Settings, Sun, Moon, RotateCcw } from '../components/ui/icons'
+import { ArrowRight, Menu, Settings, Sun, Moon, RotateCcw, Upload } from '../components/ui/icons'
 
 export function SettingsPage() {
   const settings = useAppStore((state) => state.settings)
   const setTheme = useAppStore((state) => state.setTheme)
   const setFontScale = useAppStore((state) => state.setFontScale)
   const setAutoNext = useAppStore((state) => state.setAutoNext)
+  const setShowSampleBanks = useAppStore((state) => state.setShowSampleBanks)
+  const bankCount = useAppStore((state) => state.banks.length)
   const resetProgress = useAppStore((state) => state.resetProgress)
   const favorites = useAppStore((state) => state.favorites)
   const wrongBook = useAppStore((state) => state.wrongBook)
@@ -92,17 +94,55 @@ export function SettingsPage() {
 
       <section className="settings-group">
         <div className="settings-group-head">
+          <h2 className="serif">题库</h2>
+          <span>内容来源</span>
+        </div>
+        <div className="settings-row">
+          <div>
+            <strong>显示示例题库</strong>
+            <p>
+              内置的 32 个示例题库每个只有 6-7 题，仅演示产品结构。关闭后题库总览只显示你导入的题库。
+            </p>
+          </div>
+          <button
+            role="switch"
+            aria-checked={settings.showSampleBanks}
+            className={`switch${settings.showSampleBanks ? ' on' : ''}`}
+            onClick={() => setShowSampleBanks(!settings.showSampleBanks)}
+          >
+            <span />
+          </button>
+        </div>
+        <div className="settings-row">
+          <div>
+            <strong>导入题库</strong>
+            <p>
+              当前已导入 {bankCount} 个题库。支持 JSON / CSV，逐行校验后保存在本机。
+            </p>
+          </div>
+          <Link to="/import" className="button button-ghost button-sm">
+            <Upload /> 去导入
+          </Link>
+        </div>
+      </section>
+
+      <section className="settings-group">
+        <div className="settings-group-head">
           <h2 className="serif">数据</h2>
           <span>保存在本机</span>
         </div>
         <div className="settings-data">
           <div>
+            <strong className="mono">{bankCount}</strong>
+            <span>导入题库</span>
+          </div>
+          <div>
             <strong className="mono">{collections.length}</strong>
-            <span>题库</span>
+            <span>示例题库</span>
           </div>
           <div>
             <strong className="mono">{totalQuestions}</strong>
-            <span>题目</span>
+            <span>示例题目</span>
           </div>
           <div>
             <strong className="mono">{favorites.length}</strong>

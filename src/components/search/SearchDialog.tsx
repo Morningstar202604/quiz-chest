@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { questionBank } from '../../data'
 import { domains } from '../../data/taxonomy'
 import { searchCatalog } from '../../lib/search'
 import { Chip } from './Chip'
@@ -128,7 +127,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                 <div className="search-section">
                   <span className="search-label">题目</span>
                   {results.questions.map((question) => {
-                    const collection = questionBank.find(
+                    const collection = results.collections.find(
                       (item) => item.id === question.collectionId,
                     )
                     return (

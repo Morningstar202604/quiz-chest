@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { collections, domains } from '../data/taxonomy'
-import { questionBank, totalQuestions, getCollection } from '../data'
+import { totalQuestions, getCollection } from '../data'
 import { goals } from '../data/goals'
 import { useAppStore } from '../store/useAppStore'
 import { dateKey, percent, streakFromDates } from '../lib/quiz'
@@ -150,7 +150,7 @@ export function HomePage() {
                 <strong>继续「{lastCollection.title}」</strong>
                 <small>
                   {lastCollection.exam} · 共{' '}
-                  {questionBank.find((item) => item.id === lastCollection.id)?.questions.length ?? 0} 题
+                  {lastCollection.questions.length} 题
                 </small>
               </span>
               <Zap />

@@ -15,6 +15,7 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  Upload,
 } from '../ui/icons'
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ interface SidebarProps {
 export function Sidebar({ open, onClose }: SidebarProps) {
   const wrongCount = useAppStore((state) => Object.keys(state.wrongBook).length)
   const favoriteCount = useAppStore((state) => state.favorites.length)
+  const bankCount = useAppStore((state) => state.banks.length)
   const daily = useAppStore((state) => state.daily)
   const streak = streakFromDates(Object.keys(daily))
 
@@ -73,6 +75,15 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         >
           <Library />
           题库总览
+        </NavLink>
+        <NavLink
+          to="/library"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          onClick={onClose}
+        >
+          <Upload />
+          我的题库
+          {bankCount > 0 ? <span className="nav-count">{bankCount}</span> : null}
         </NavLink>
       </nav>
 
@@ -150,6 +161,12 @@ export function MobileNav() {
       label: '题库',
       icon: LayoutGrid,
       match: pathname.startsWith('/catalog') || pathname.startsWith('/domain'),
+    },
+    {
+      to: '/library',
+      label: '我的',
+      icon: Upload,
+      match: pathname.startsWith('/library') || pathname.startsWith('/import'),
     },
     {
       to: '/strategy/daily',

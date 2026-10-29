@@ -6,6 +6,7 @@ export type DomainId =
   | 'coding'
   | 'public'
   | 'general'
+  | 'imported'
 
 export type Level = '入门' | '进阶' | '挑战'
 

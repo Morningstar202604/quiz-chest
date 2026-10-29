@@ -20,7 +20,7 @@ import {
   Trophy,
   X,
 } from '../ui/icons'
-import { useTimer } from '../../hooks/useTimer'
+import { useTimer, useCountdown } from '../../hooks/useTimer'
 
 const EMPTY_SELECTION: number[] = []
 
@@ -40,6 +40,7 @@ export interface PracticeRunnerProps {
   historyDomainId?: string
   backTo: string
   emptyHint?: string
+  timeLimitSec?: number
 }
 
 export function PracticeRunner({
@@ -52,6 +53,7 @@ export function PracticeRunner({
   historyDomainId,
   backTo,
   emptyHint,
+  timeLimitSec,
 }: PracticeRunnerProps) {
   const navigate = useNavigate()
   const wrongBook = useAppStore((state) => state.wrongBook)
@@ -77,6 +79,14 @@ export function PracticeRunner({
   const finishedRef = useRef(false)
 
   const elapsed = useTimer(true)
+
+  const finishRef = useRef<() => void>(() => {})
+  const { remaining: remainingLabel, remainingSec } = useCountdown(
+    mode === 'exam' && typeof timeLimitSec === 'number' && timeLimitSec > 0,
+    typeof timeLimitSec === 'number' && timeLimitSec > 0 ? timeLimitSec : 1,
+    () => finishRef.current(),
+  )
+  const timeCritical = mode === 'exam' && remainingSec <= 60
 
   const current = sessionQuestions[index]
   const selection = current ? answers[current.id] ?? EMPTY_SELECTION : EMPTY_SELECTION
@@ -205,6 +215,10 @@ export function PracticeRunner({
   ])
 
   useEffect(() => {
+    finishRef.current = finish
+  }, [finish])
+
+  useEffect(() => {
     if (startedAt.current === null) startedAt.current = Date.now()
   }, [])
 
@@ -292,9 +306,18 @@ export function PracticeRunner({
           </span>
           <strong>{title}</strong>
         </div>
-        <div className="practice-timer mono">
-          <Clock /> {elapsed}
-        </div>
+        {mode === 'exam' && typeof timeLimitSec === 'number' && timeLimitSec > 0 ? (
+          <div
+            className={`practice-timer mono${timeCritical ? ' timer-critical' : ''}`}
+            aria-label={`剩余时间 ${remainingLabel}`}
+          >
+            <Clock /> {remainingLabel}
+          </div>
+        ) : (
+          <div className="practice-timer mono">
+            <Clock /> {elapsed}
+          </div>
+        )}
         <button
           className={`icon-button${showOutline ? ' active' : ''}`}
           onClick={() => setShowOutline((value) => !value)}

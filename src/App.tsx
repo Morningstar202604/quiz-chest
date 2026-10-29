@@ -13,6 +13,8 @@ import { WrongBookPage } from './pages/WrongBookPage'
 import { FavoritesPage } from './pages/FavoritesPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { ImportPage } from './pages/ImportPage'
+import { LibraryPage } from './pages/LibraryPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
 const StatsPage = lazy(() =>
@@ -30,6 +32,8 @@ export function App() {
           <Route index element={<HomePage />} />
           <Route path="catalog" element={<CatalogPage />} />
           <Route path="domain/:domainId" element={<DomainPage />} />
+          <Route path="library" element={<LibraryPage />} />
+          <Route path="import" element={<ImportPage />} />
           <Route path="goals" element={<GoalsPage />} />
           <Route path="goal/:goalId" element={<GoalPage />} />
           <Route path="strategy/:kind" element={<StrategyPage />} />

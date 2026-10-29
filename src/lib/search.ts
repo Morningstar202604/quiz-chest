@@ -1,10 +1,14 @@
 import { collections, domains } from '../data/taxonomy'
-import { questionBank } from '../data'
-import type { CollectionWithQuestions, Question } from '../data/types'
+import { getLibraryCollections, type LibraryCollection } from './library'
+import type { Question } from '../data/types'
 
 export interface SearchResult {
-  collections: CollectionWithQuestions[]
+  collections: LibraryCollection[]
   questions: Question[]
+}
+
+function currentBanks(): LibraryCollection[] {
+  return getLibraryCollections()
 }
 
 const aliases: Record<string, string[]> = {
@@ -46,9 +50,10 @@ export function searchCatalog(rawQuery: string, limit = 12): SearchResult {
   const query = rawQuery.trim().toLowerCase()
   if (!query) return { collections: [], questions: [] }
 
+  const bank = currentBanks()
   const domainNameById = new Map(domains.map((domain) => [domain.id, domain.name]))
 
-  const collectionResults = questionBank
+  const collectionResults = bank
     .filter((collection) => {
       const haystack = [
         collection.title,
@@ -66,7 +71,7 @@ export function searchCatalog(rawQuery: string, limit = 12): SearchResult {
     .sort((a, b) => b.heat - a.heat)
     .slice(0, 6)
 
-  const questionResults = questionBank
+  const questionResults = bank
     .flatMap((collection) => collection.questions)
     .filter((question) => {
       const haystack = [question.stem, ...question.tags, ...question.options].join(' ').toLowerCase()
@@ -78,5 +83,7 @@ export function searchCatalog(rawQuery: string, limit = 12): SearchResult {
 }
 
 export function collectionTitleOf(collectionId: string): string {
+  const imported = currentBanks().find((collection) => collection.id === collectionId)
+  if (imported) return imported.title
   return collections.find((collection) => collection.id === collectionId)?.title ?? ''
 }

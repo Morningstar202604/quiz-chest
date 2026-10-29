@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getCollection } from '../data'
 import { domains } from '../data/taxonomy'
 import { useAppStore } from '../store/useAppStore'
+import { useLibraryCollections, type LibraryCollection } from '../lib/library'
 import { Badge, EmptyState, ProgressBar } from '../components/ui/primitives'
 import { DomainIcon } from '../components/ui/icons'
 import {
@@ -21,7 +21,10 @@ import {
 
 export function CollectionPage() {
   const { collectionId = '' } = useParams()
-  const collection = getCollection(collectionId)
+  const libraryMatch: LibraryCollection | undefined = useLibraryCollections().find(
+    (item) => item.id === collectionId,
+  )
+  const collection: LibraryCollection | undefined = libraryMatch
   const history = useAppStore((state) => state.history)
   const wrongBook = useAppStore((state) => state.wrongBook)
   const favorites = useAppStore((state) => state.favorites)
@@ -46,7 +49,9 @@ export function CollectionPage() {
     )
   }
 
-  const domain = domains.find((item) => item.id === collection.domainId)
+  const domain = domains.find((item) => item.id === collection.domainId) ?? (collection.origin === 'imported'
+    ? { name: '我的题库', accent: collection.accent }
+    : undefined)
   const wrongCount = collection.questions.filter((question) => wrongBook[question.id]).length
   const favoriteCount = collection.questions.filter((question) => favorites.includes(question.id)).length
   const bestAccuracy = records.reduce((best, entry) => Math.max(best, entry.accuracy), 0)
@@ -80,6 +85,15 @@ export function CollectionPage() {
               <Badge tone="accent">{collection.exam}</Badge>
               <Badge tone="neutral">{collection.level}</Badge>
               <Badge tone="moss">更新于 {collection.updated}</Badge>
+              {collection.origin === 'builtin' ? (
+                <Badge tone="gold" outline>
+                  示例题库 · 非正式教材
+                </Badge>
+              ) : (
+                <Badge tone="gold" outline>
+                  我的导入
+                </Badge>
+              )}
             </div>
             <h1 className="page-title serif">{collection.title}</h1>
             <p className="page-sub">{collection.description}</p>

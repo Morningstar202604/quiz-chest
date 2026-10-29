@@ -59,6 +59,7 @@ import {
   Trash2,
   TrendingUp,
   Trophy,
+  Upload,
   X,
   Zap,
 } from 'lucide-react'
@@ -113,6 +114,7 @@ export {
   ArrowRight,
   Award,
   BarChart3,
+  BookOpen,
   Bookmark,
   ChevronDown,
   ChevronRight,
@@ -137,6 +139,7 @@ export {
   Trash2,
   TrendingUp,
   Trophy,
+  Upload,
   X,
   Zap,
 }
