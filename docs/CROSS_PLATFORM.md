@@ -95,7 +95,29 @@ pnpm tauri build    # 产出安装包
 
 ## 四、Android（Capacitor 8）
 
-前置：Android Studio + Android SDK（API 35）、JDK 21（本机 `C:\Dev\jdk-21`）、Gradle。
+前置（本机已按此路径安装）：
+
+| 组件 | 路径 | 版本 |
+| --- | --- | --- |
+| Android SDK | `C:\Devndroid-sdk` | cmdline-tools 12.0 / platform 35 + 36 / build-tools 35.0.0 |
+| JDK | `C:\Dev\jdk-21` | OpenJDK 21.0.2 |
+| Gradle | `C:\Dev\gradle-8.14.3\gradle-8.14.3` | 8.14.3（镜像下载） |
+| Gradle 用户目录 | `C:\Dev\gradle-home` | 含阿里云镜像 init 脚本 |
+
+构建命令（本机实测通过）：
+
+```bash
+export ANDROID_HOME='C:\Devndroid-sdk'
+export JAVA_HOME='C:\Dev\jdk-21'
+export GRADLE_USER_HOME='C:\Dev\gradle-home'
+pnpm build:native
+npx cap sync android
+cd android && "C:/Dev/gradle-8.14.3/gradle-8.14.3/bin/gradle" assembleDebug --no-daemon
+```
+
+产物：`android/app/build/outputs/apk/debug/app-debug.apk`（4.4 MB），已复制到 `artifacts/tiyu-1.0.0-debug.apk`。
+
+> 注意：`gradle/wrapper/gradle-wrapper.properties` 默认指向 services.gradle.org，本机网络不可达；因此实际构建使用本地 Gradle 8.14.3，并设置 `GRADLE_USER_HOME` 到短路径（避免 Windows 长路径与 JVM 内存问题）。`org.gradle.jvmargs` 控制在 1024m，否则 16 GB 内存机器上 daemon 会 OOM。
 
 ```bash
 pnpm add @capacitor/core@8 @capacitor/android@8

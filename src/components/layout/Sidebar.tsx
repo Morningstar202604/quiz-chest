@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { domains } from '../../data/taxonomy'
-import { collections } from '../../data/taxonomy'
+
+import { goals } from '../../data/goals'
 import { useAppStore } from '../../store/useAppStore'
 import { streakFromDates } from '../../lib/quiz'
 import {
@@ -8,15 +8,14 @@ import {
   Bookmark,
   Flame,
   House,
-  Layers,
   LayoutGrid,
-  ListChecks,
   Library,
+  ListChecks,
   Settings,
+  Sparkles,
   Target,
   TrendingUp,
 } from '../ui/icons'
-import { DomainIcon } from '../ui/icons'
 
 interface SidebarProps {
   open: boolean
@@ -40,7 +39,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       </NavLink>
 
       <nav className="nav-group">
-        <span className="nav-label">学习</span>
+        <span className="nav-label">开始</span>
         <NavLink
           to="/"
           end
@@ -51,6 +50,23 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           学习台
         </NavLink>
         <NavLink
+          to="/goals"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          onClick={onClose}
+        >
+          <Target />
+          目标方案
+          <span className="nav-count">{goals.length}</span>
+        </NavLink>
+        <NavLink
+          to="/strategy/daily"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          onClick={onClose}
+        >
+          <Sparkles />
+          练习策略
+        </NavLink>
+        <NavLink
           to="/catalog"
           className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           onClick={onClose}
@@ -58,6 +74,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <Library />
           题库总览
         </NavLink>
+      </nav>
+
+      <nav className="nav-group">
+        <span className="nav-label">我的</span>
         <NavLink
           to="/wrong"
           className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
@@ -94,29 +114,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </NavLink>
       </nav>
 
-      <div className="nav-group">
-        <span className="nav-label">分类</span>
-        <div className="domain-nav">
-          {domains.map((domain) => {
-            const count = collections.filter((item) => item.domainId === domain.id).length
-            return (
-              <NavLink
-                key={domain.id}
-                to={`/domain/${domain.id}`}
-                className={({ isActive }) => `domain-link${isActive ? ' active' : ''}`}
-                onClick={onClose}
-              >
-                <DomainIcon name={domain.icon} />
-                <span>{domain.name}</span>
-                <span className="domain-index" style={{ marginLeft: 'auto' }}>
-                  {count}
-                </span>
-              </NavLink>
-            )
-          })}
-        </div>
-      </div>
-
       <div className="sidebar-foot">
         <div className="streak-card">
           <span className="streak-flame">
@@ -136,8 +133,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           设置
         </NavLink>
         <p className="sidebar-note">
-          <Layers style={{ width: 11, height: 11, verticalAlign: '-1px' }} /> 题库持续扩充中 ·
-          本地离线可用
+          <LayoutGrid style={{ width: 11, height: 11, verticalAlign: '-1px' }} /> 七大领域 · 32
+          个题库 · 离线可用
         </p>
       </div>
     </aside>
@@ -148,7 +145,18 @@ export function MobileNav() {
   const { pathname } = useLocation()
   const items = [
     { to: '/', label: '学习台', icon: House, match: pathname === '/' },
-    { to: '/catalog', label: '题库', icon: LayoutGrid, match: pathname.startsWith('/catalog') || pathname.startsWith('/domain') },
+    {
+      to: '/catalog',
+      label: '题库',
+      icon: LayoutGrid,
+      match: pathname.startsWith('/catalog') || pathname.startsWith('/domain'),
+    },
+    {
+      to: '/strategy/daily',
+      label: '策略',
+      icon: Sparkles,
+      match: pathname.startsWith('/strategy') || pathname.startsWith('/practice-plan'),
+    },
     { to: '/wrong', label: '错题本', icon: Target, match: pathname.startsWith('/wrong') },
     { to: '/stats', label: '统计', icon: TrendingUp, match: pathname.startsWith('/stats') },
   ]

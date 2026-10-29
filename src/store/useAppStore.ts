@@ -15,6 +15,7 @@ export interface HistoryEntry {
   mode: SessionMode
   collectionId: string
   collectionTitle: string
+  domainId?: string
   answered: number
   correct: number
   wrong: number

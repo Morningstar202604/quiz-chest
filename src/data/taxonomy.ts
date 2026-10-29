@@ -1,4 +1,4 @@
-import type { Collection, Domain } from './types'
+import type { Collection, Domain, Track } from './types'
 
 export const domains: Domain[] = [
   {
@@ -73,7 +73,7 @@ export const domains: Domain[] = [
   },
 ]
 
-export const collections: Collection[] = [
+const baseCollections: Omit<Collection, 'trackId'>[] = [
   {
     id: 'primary-math',
     domainId: 'k12',
@@ -523,3 +523,86 @@ export const collections: Collection[] = [
     updated: '2026-08-17',
   },
 ]
+
+export const tracks: Track[] = [
+  { id: 'primary', domainId: 'k12', name: '小学', short: '小学', description: '数感与思维启蒙' },
+  { id: 'middle', domainId: 'k12', name: '初中', short: '初中', description: '中考学科基础' },
+  { id: 'high', domainId: 'k12', name: '高中', short: '高中', description: '高考核心科目' },
+
+  { id: 'math-public', domainId: 'university', name: '数学公共课', short: '数学', description: '高数、线代、概率' },
+  { id: 'english-public', domainId: 'university', name: '英语与通识', short: '英语', description: '四六级与大学英语' },
+  { id: 'cs-major', domainId: 'university', name: '计算机专业课', short: '计算机', description: '408 与专业基础' },
+
+  { id: 'education', domainId: 'career', name: '教育与师范', short: '教育', description: '教师资格与教育理论' },
+  { id: 'finance', domainId: 'career', name: '财会金融', short: '财会', description: '会计职称与实务' },
+  { id: 'engineering', domainId: 'career', name: '工程建造', short: '工程', description: '建造师与工程法规' },
+  { id: 'health-law', domainId: 'career', name: '医药与法律', short: '医法', description: '执业药师与法考' },
+
+  { id: 'overseas', domainId: 'language', name: '出国考试', short: '出国', description: '雅思与托福' },
+  { id: 'other-language', domainId: 'language', name: '小语种与职场', short: '小语种', description: '日语与商务英语' },
+
+  { id: 'frontend', domainId: 'coding', name: '前端开发', short: '前端', description: 'JavaScript 与 TypeScript' },
+  { id: 'cs-fundamentals', domainId: 'coding', name: '计算机基础', short: '基础', description: '算法与网络' },
+  { id: 'data', domainId: 'coding', name: '数据方向', short: '数据', description: 'SQL 与数据查询' },
+
+  { id: 'xingce', domainId: 'public', name: '行测', short: '行测', description: '言语与数量关系' },
+  { id: 'shenlun', domainId: 'public', name: '申论', short: '申论', description: '材料分析与写作' },
+  { id: 'public-base', domainId: 'public', name: '公共基础', short: '公基', description: '政治法律与公文' },
+
+  { id: 'humanities', domainId: 'general', name: '人文', short: '人文', description: '历史与文学艺术' },
+  { id: 'science', domainId: 'general', name: '科学', short: '科学', description: '地理与生活科学' },
+]
+
+const trackOfCollection: Record<string, string> = {
+  'primary-math': 'primary',
+  'middle-math': 'middle',
+  'high-chinese': 'high',
+  'gaokao-english': 'high',
+  'gaokao-physics': 'high',
+
+  calculus: 'math-public',
+  'linear-algebra': 'math-public',
+  probability: 'math-public',
+  cet4: 'english-public',
+  'computer-organization': 'cs-major',
+
+  'teacher-cert': 'education',
+  accounting: 'finance',
+  'construction-law': 'engineering',
+  pharmacist: 'health-law',
+  'law-exam': 'health-law',
+
+  'ielts-reading': 'overseas',
+  'toefl-listening': 'overseas',
+  japanese: 'other-language',
+  'business-english': 'other-language',
+
+  'js-basics': 'frontend',
+  'ts-types': 'frontend',
+  algorithms: 'cs-fundamentals',
+  network: 'cs-fundamentals',
+  sql: 'data',
+
+  verbal: 'xingce',
+  quantitative: 'xingce',
+  essay: 'shenlun',
+  'public-base': 'public-base',
+
+  'chinese-history': 'humanities',
+  arts: 'humanities',
+  'world-geography': 'science',
+  'life-science': 'science',
+}
+
+export const collections: Collection[] = baseCollections.map((collection) => ({
+  ...collection,
+  trackId: trackOfCollection[collection.id] ?? '',
+}))
+
+export function tracksOfDomain(domainId: string): Track[] {
+  return tracks.filter((track) => track.domainId === domainId)
+}
+
+export function collectionsOfTrack(trackId: string): Collection[] {
+  return collections.filter((collection) => collection.trackId === trackId)
+}

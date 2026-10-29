@@ -11,4 +11,9 @@ src-tauri/target/
 android/.gradle/
 android/app/build/
 android/build/
+android/.idea/
+android/local.properties
+android/hs_err_pid*.log
+.gradle-home/
+artifacts/*.apk
 .aqg/

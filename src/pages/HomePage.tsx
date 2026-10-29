@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { collections, domains } from '../data/taxonomy'
 import { questionBank, totalQuestions, getCollection } from '../data'
+import { goals } from '../data/goals'
 import { useAppStore } from '../store/useAppStore'
 import { dateKey, percent, streakFromDates } from '../lib/quiz'
+import { buildDailyPlan } from '../lib/strategy'
 import {
   ArrowRight,
   Bookmark,
@@ -18,9 +20,42 @@ import {
   Zap,
 } from '../components/ui/icons'
 import { DomainIcon } from '../components/ui/icons'
-import { Badge, EmptyState, ProgressBar, Stat } from '../components/ui/primitives'
+import { Badge, ProgressBar } from '../components/ui/primitives'
 
 const TODAY_KEY = dateKey(Date.now())
+
+const paths = [
+  {
+    id: 'goal',
+    to: '/goals',
+    kicker: '路径一',
+    title: '我有明确目标',
+    copy: '考研、面试、考证、出国 —— 按目标给你排好顺序。',
+    detail: `${goals.length} 条备考路线`,
+    icon: Target,
+    tone: 'goal',
+  },
+  {
+    id: 'browse',
+    to: '/catalog',
+    kicker: '路径二',
+    title: '我想按领域找',
+    copy: '先选大方向，再看学段与科目，一层层缩小范围。',
+    detail: `${domains.length} 个领域 · ${collections.length} 个题库`,
+    icon: Library,
+    tone: 'browse',
+  },
+  {
+    id: 'auto',
+    to: '/strategy/daily',
+    kicker: '路径三',
+    title: '不知道练什么',
+    copy: '交给系统：按薄弱项与遗忘曲线自动配题。',
+    detail: '4 种练习策略',
+    icon: Sparkles,
+    tone: 'auto',
+  },
+] as const
 
 export function HomePage() {
   const history = useAppStore((state) => state.history)
@@ -29,247 +64,183 @@ export function HomePage() {
   const favorites = useAppStore((state) => state.favorites)
   const lastCollectionId = useAppStore((state) => state.lastCollectionId)
   const lastCollection = lastCollectionId ? getCollection(lastCollectionId) : undefined
-  const streak = streakFromDates(Object.keys(daily))
 
+  const streak = streakFromDates(Object.keys(daily))
   const totalAnswered = Object.values(daily).reduce((sum, item) => sum + item.answered, 0)
   const totalCorrect = Object.values(daily).reduce((sum, item) => sum + item.correct, 0)
   const accuracy = percent(totalCorrect, totalAnswered)
-  const lastSession = history[0]
+  const todayAnswered = daily[TODAY_KEY]?.answered ?? 0
 
-  const todayKey = TODAY_KEY
-  const todayAnswered = daily[todayKey]?.answered ?? 0
-
-  const recommended = [...collections].sort((a, b) => b.heat - a.heat).slice(0, 4)
-  const featured = collections.find((item) => item.id === 'js-basics') ?? collections[0]
+  const plan = buildDailyPlan({ history })
+  const coveredCollections = new Set(plan.questions.map((question) => question.collectionId))
 
   return (
     <div className="home">
-      <section className="welcome">
-        <div className="welcome-main">
+      <section className="home-head">
+        <div className="home-head-main">
           <span className="eyebrow">
-            <Sparkles /> 今日题库
+            <Sparkles /> 今天想怎么练
           </span>
-          <h1 className="welcome-title serif">
-            把每一个知识点，
+          <h1 className="home-title serif">
+            不用先想清楚练什么，
             <br />
-            都变成<span className="accent-underline">确定会做</span>的题。
+            先选一条<span className="accent-underline">找题的路</span>。
           </h1>
-          <p className="welcome-sub">
-            七大领域，{collections.length} 个题库，{totalQuestions} 道精选题。
-            从升学、考证到编程与通识，按你的目标直接开练。
-          </p>
-          <div className="welcome-actions">
-            {lastCollection ? (
-              <Link
-                to={`/practice/${lastCollection.id}?mode=practice`}
-                className="button button-primary"
-              >
-                <Zap />
-                继续学习 · {lastCollection.title}
-              </Link>
-            ) : (
-              <Link to="/catalog" className="button button-primary">
-                <Library />
-                开始第一组练习
-              </Link>
-            )}
-            <Link to="/catalog" className="button button-ghost">
-              浏览全部题库
-              <ArrowRight />
-            </Link>
-          </div>
         </div>
-        <aside className="welcome-aside" aria-label="今日概览">
-          <div className="ordeal-card">
-            <span className="ordeal-label">今日进度</span>
-            <div className="ordeal-value">
-              <strong className="mono">{String(todayAnswered).padStart(2, '0')}</strong>
-              <span>题</span>
-            </div>
-            <ProgressBar value={Math.min(100, (todayAnswered / 20) * 100)} label="今日刷题进度" />
-            <div className="ordeal-foot">
-              <span>
-                <Flame /> 连续 {streak} 天
-              </span>
-              <span>{todayAnswered >= 20 ? '已达标' : `还差 ${20 - todayAnswered} 题达标`}</span>
-            </div>
-          </div>
-          <div className="aside-note">
-            <p className="serif">“学而时习之，不亦说乎。”</p>
-            <span>每日目标 20 题，重在持续，不在一次刷完。</span>
-          </div>
-        </aside>
-      </section>
-
-      <section className="stat-strip" aria-label="学习概况">
-        <Stat label="累计作答" value={totalAnswered} hint="覆盖全部题库" icon={<Layers />} />
-        <Stat
-          label="平均正确率"
-          value={`${accuracy}%`}
-          hint={totalAnswered > 0 ? `答对 ${totalCorrect} 题` : '完成练习后生成'}
-          icon={<TrendingUp />}
-        />
-        <Stat
-          label="错题待复习"
-          value={Object.keys(wrongBook).length}
-          hint="按错误次数排序"
-          icon={<Target />}
-        />
-        <Stat label="收藏题目" value={favorites.length} hint="随时回看" icon={<Bookmark />} />
-      </section>
-
-      <section className="section">
-        <div className="section-head">
-          <div>
-            <span className="eyebrow">分类导航</span>
-            <h2 className="section-title serif">七大领域，找到你的战场</h2>
-          </div>
-          <Link to="/catalog" className="section-link">
-            全部题库 <ChevronRight />
-          </Link>
-        </div>
-        <div className="domain-grid">
-          {domains.map((domain) => {
-            const owned = collections.filter((item) => item.domainId === domain.id)
-            const count = owned.reduce((sum, item) => sum + (questionBank.find((entry) => entry.id === item.id)?.questions.length ?? 0), 0)
-            return (
-              <Link
-                key={domain.id}
-                to={`/domain/${domain.id}`}
-                className="domain-card"
-                style={{ '--domain-accent': domain.accent } as React.CSSProperties}
-              >
-                <div className="domain-card-top">
-                  <span className="domain-card-mark">
-                    <DomainIcon name={domain.icon} />
-                  </span>
-                  <span className="domain-card-index mono">{domain.index}</span>
-                </div>
-                <h3>{domain.name}</h3>
-                <p>{domain.description}</p>
-                <div className="domain-card-foot">
-                  <span>{owned.length} 个题库</span>
-                  <span className="dot-sep">·</span>
-                  <span>{count} 题</span>
-                  <ChevronRight className="domain-arrow" />
-                </div>
-              </Link>
-            )
-          })}
-        </div>
-      </section>
-
-      <section className="split-section">
-        <div className="section split-main">
-          <div className="section-head">
-            <div>
-              <span className="eyebrow">精选推荐</span>
-              <h2 className="section-title serif">本周最热题库</h2>
-            </div>
-            <Link to="/catalog" className="section-link">
-              更多 <ChevronRight />
-            </Link>
-          </div>
-          <div className="collection-list">
-            {recommended.map((collection, index) => {
-              const domain = domains.find((item) => item.id === collection.domainId)
-              return (
-                <Link
-                  key={collection.id}
-                  to={`/collection/${collection.id}`}
-                  className="collection-row"
-                >
-                  <span className="collection-rank mono">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <span
-                    className="collection-row-icon"
-                    style={{ color: domain?.accent }}
-                  >
-                    <DomainIcon name={collection.icon} />
-                  </span>
-                  <span className="collection-row-text">
-                    <span className="collection-row-title">
-                      {collection.title}
-                      <Badge tone="neutral">{collection.exam}</Badge>
-                    </span>
-                    <span className="collection-row-sub">{collection.subtitle}</span>
-                  </span>
-                  <span className="collection-row-meta">
-                    <Clock /> {collection.durationMin} 分钟
-                  </span>
-                  <span className="collection-row-heat mono">{collection.heat}°</span>
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-
-        <aside className="section split-side">
-          <div className="section-head">
-            <div>
-              <span className="eyebrow">学习轨迹</span>
-              <h2 className="section-title serif">最近一次</h2>
-            </div>
-          </div>
-          {lastSession ? (
-            <div className="recent-card">
-              <div className="recent-head">
-                <Trophy />
-                <span>{lastSession.mode === 'exam' ? '模拟考试' : '练习'}已完成</span>
-              </div>
-              <h3>{lastSession.collectionTitle}</h3>
-              <div className="recent-score">
-                <strong className="mono">{lastSession.accuracy}%</strong>
-                <span>
-                  答对 {lastSession.correct} / {lastSession.total} 题
-                </span>
-              </div>
-              <div className="recent-meta">
-                <span>
-                  <Clock /> {Math.max(1, Math.round(lastSession.durationSec / 60))} 分钟
-                </span>
-                <span>
-                  <Target /> 错 {lastSession.wrong} 题
-                </span>
-              </div>
-              <Link to="/history" className="text-link">
-                查看全部记录 <ArrowRight />
-              </Link>
-            </div>
-          ) : (
-            <EmptyState
-              icon={<Trophy />}
-              title="还没有练习记录"
-              description="完成任意一组题后，这里会显示你的成绩与用时。"
-              action={
-                <Link to="/catalog" className="button button-primary button-sm">
-                  去选一个题库
-                </Link>
-              }
-            />
-          )}
-        </aside>
-      </section>
-
-      <section className="feature-band">
-        <div className="feature-copy">
-          <span className="eyebrow">每日一练</span>
-          <h2 className="serif">今天，先从 {featured.title} 开始</h2>
-          <p>{featured.description}</p>
-          <div className="feature-actions">
-            <Link to={`/collection/${featured.id}`} className="button button-ink">
-              查看题库
-              <ArrowRight />
-            </Link>
-            <span className="feature-meta">
-              {(questionBank.find((entry) => entry.id === featured.id)?.questions.length ?? 0)} 题 · 预计 {featured.durationMin} 分钟
+        <div className="home-today">
+          <div className="home-today-top">
+            <span className="home-today-label">今日</span>
+            <span className="home-today-streak">
+              <Flame /> {streak > 0 ? `${streak} 天` : '未开始'}
             </span>
           </div>
+          <div className="home-today-value">
+            <strong className="mono">{String(todayAnswered).padStart(2, '0')}</strong>
+            <span>/ 20 题</span>
+          </div>
+          <ProgressBar value={Math.min(100, (todayAnswered / 20) * 100)} label="今日刷题进度" />
+          <p className="home-today-foot">
+            {todayAnswered >= 20 ? '今日目标已完成' : `还差 ${20 - todayAnswered} 题`}
+          </p>
         </div>
-        <div className="feature-figure" aria-hidden="true">
-          <span className="figure-numeral serif">题</span>
-          <span className="figure-caption">Practice makes permanent.</span>
+      </section>
+
+      <section className="path-grid" aria-label="三条找题路径">
+        {paths.map((path) => {
+          const Icon = path.icon
+          return (
+            <Link key={path.id} to={path.to} className={`path-card path-${path.tone}`}>
+              <span className="path-kicker">{path.kicker}</span>
+              <span className="path-icon">
+                <Icon />
+              </span>
+              <h2 className="serif">{path.title}</h2>
+              <p>{path.copy}</p>
+              <span className="path-foot">
+                {path.detail}
+                <ArrowRight />
+              </span>
+            </Link>
+          )
+        })}
+      </section>
+
+      <section className="home-continue">
+        <div className="section-head">
+          <div>
+            <span className="eyebrow">接着上次</span>
+            <h2 className="section-title serif">
+              {lastCollection ? lastCollection.title : '还没有开始，先做一组'}
+            </h2>
+          </div>
+          <Link to="/history" className="section-link">
+            练习记录 <ChevronRight />
+          </Link>
+        </div>
+        <div className="continue-row">
+          {lastCollection ? (
+            <Link
+              to={`/practice/${lastCollection.id}?mode=practice`}
+              className="continue-card continue-primary"
+            >
+              <span className="continue-icon">
+                <DomainIcon name={lastCollection.icon} />
+              </span>
+              <span className="continue-text">
+                <strong>继续「{lastCollection.title}」</strong>
+                <small>
+                  {lastCollection.exam} · 共{' '}
+                  {questionBank.find((item) => item.id === lastCollection.id)?.questions.length ?? 0} 题
+                </small>
+              </span>
+              <Zap />
+            </Link>
+          ) : null}
+          <Link to="/strategy/daily" className="continue-card">
+            <span className="continue-icon muted">
+              <Sparkles />
+            </span>
+            <span className="continue-text">
+              <strong>今日一练</strong>
+              <small>
+                {plan.questions.length} 题 · 覆盖 {coveredCollections.size} 个题库
+              </small>
+            </span>
+            <ArrowRight />
+          </Link>
+          <Link to="/wrong" className="continue-card">
+            <span className="continue-icon muted">
+              <Target />
+            </span>
+            <span className="continue-text">
+              <strong>错题复习</strong>
+              <small>{Object.keys(wrongBook).length} 道待复习</small>
+            </span>
+            <ArrowRight />
+          </Link>
+        </div>
+      </section>
+
+      <section className="home-insights">
+        <div className="insight-strip">
+          <div>
+            <Layers />
+            <span>累计作答</span>
+            <strong className="mono">{totalAnswered}</strong>
+          </div>
+          <div>
+            <TrendingUp />
+            <span>平均正确率</span>
+            <strong className="mono">{accuracy}%</strong>
+          </div>
+          <div>
+            <Bookmark />
+            <span>收藏</span>
+            <strong className="mono">{favorites.length}</strong>
+          </div>
+          <div>
+            <Trophy />
+            <span>练习次数</span>
+            <strong className="mono">{history.length}</strong>
+          </div>
+          <div>
+            <Clock />
+            <span>题库总量</span>
+            <strong className="mono">{totalQuestions}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-goals">
+        <div className="section-head">
+          <div>
+            <span className="eyebrow">如果目标明确</span>
+            <h2 className="section-title serif">直接进入一条备考路线</h2>
+          </div>
+          <Link to="/goals" className="section-link">
+            全部 {goals.length} 条 <ChevronRight />
+          </Link>
+        </div>
+        <div className="goal-rail">
+          {goals.map((goal) => (
+            <Link
+              key={goal.id}
+              to={`/goal/${goal.id}`}
+              className="goal-chip"
+              style={{ '--goal-accent': goal.accent } as React.CSSProperties}
+            >
+              <span className="goal-chip-icon">
+                <DomainIcon name={goal.icon} />
+              </span>
+              <span className="goal-chip-text">
+                <strong>{goal.title}</strong>
+                <small>
+                  {goal.durationWeeks} 周 · {goal.steps.length} 步
+                </small>
+              </span>
+              <Badge tone="neutral">{goal.intensity}</Badge>
+            </Link>
+          ))}
         </div>
       </section>
     </div>

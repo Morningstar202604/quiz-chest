@@ -19,11 +19,12 @@ describe('question bank integrity', () => {
     expect(collections).toHaveLength(32)
   })
 
-  it('maps every collection to a domain and unique id', () => {
+  it('maps every collection to a domain, track and unique id', () => {
     const ids = new Set(collections.map((item) => item.id))
     expect(ids.size).toBe(collections.length)
     for (const collection of collections) {
       expect(domains.some((domain) => domain.id === collection.domainId)).toBe(true)
+      expect(collection.trackId.length > 0, collection.id).toBe(true)
     }
   })
 

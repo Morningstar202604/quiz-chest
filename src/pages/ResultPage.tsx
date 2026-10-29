@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { getCollection } from '../data'
+import { getCollection, getQuestion } from '../data'
+
+const questionById = getQuestion
 import { useAppStore } from '../store/useAppStore'
 import { formatDuration, percent } from '../lib/quiz'
 import { Badge } from '../components/ui/primitives'
@@ -19,12 +21,16 @@ import {
 export function ResultPage() {
   const { collectionId = '' } = useParams()
   const [searchParams] = useSearchParams()
-  const collection = getCollection(collectionId)
+  const decodedId = decodeURIComponent(collectionId)
+  const isPlan = decodedId.startsWith('plan:')
+  const collection = isPlan ? undefined : getCollection(decodedId)
   const history = useAppStore((state) => state.history)
   const wrongBook = useAppStore((state) => state.wrongBook)
   const favorites = useAppStore((state) => state.favorites)
 
+  const resultTitle = searchParams.get('title') ?? collection?.title ?? '策略练习'
   const mode = searchParams.get('mode') ?? 'practice'
+  const backTo = searchParams.get('back') ?? (collection ? `/collection/${collection.id}` : '/catalog')
   const correct = Number(searchParams.get('correct') ?? 0)
   const answered = Number(searchParams.get('answered') ?? 0)
   const total = Number(searchParams.get('total') ?? 0)
@@ -34,11 +40,11 @@ export function ResultPage() {
   const latest = history[0]
 
   const gained = useMemo(() => {
-    if (!collection) return 0
+    if (!collection) return favorites.length
     return collection.questions.filter((question) => favorites.includes(question.id)).length
   }, [collection, favorites])
 
-  if (!collection) {
+  if (!collection && !isPlan) {
     return (
       <div className="result-page">
         <h1>结果不存在</h1>
@@ -49,17 +55,23 @@ export function ResultPage() {
     )
   }
 
-  const verdict =
-    accuracy >= 90
+  const wrongCount = answered - correct
+  const skipped = total - answered
+  const incomplete = total > 0 && answered < total * 0.6
+
+  const verdict = incomplete
+    ? {
+        label: '本次未完成',
+        tone: 'neutral',
+        text: `共 ${total} 题，只作答了 ${answered} 题。正确率仅代表已作答部分，建议完整做完再评估。`,
+      }
+    : accuracy >= 90
       ? { label: '状态极佳', tone: 'success', text: '基础扎实，可以挑战更高难度的题库了。' }
       : accuracy >= 70
         ? { label: '稳步前进', tone: 'moss', text: '大部分考点已经掌握，重点复习错题即可。' }
         : accuracy >= 50
           ? { label: '仍需巩固', tone: 'gold', text: '建议回到解析，把错题对应的知识点重新过一遍。' }
           : { label: '从头梳理', tone: 'danger', text: '先慢下来理解概念，再做一次顺序练习。' }
-
-  const wrongCount = answered - correct
-  const skipped = total - answered
 
   return (
     <div className="result-page">
@@ -72,7 +84,9 @@ export function ResultPage() {
         <h1 className="serif">{verdict.label}</h1>
         <p>{verdict.text}</p>
         <div className="result-badges">
-          <Badge tone={verdict.tone as 'success' | 'moss' | 'gold' | 'danger'}>{collection.title}</Badge>
+          <Badge tone={verdict.tone as 'success' | 'moss' | 'gold' | 'danger' | 'neutral'}>
+            {resultTitle}
+          </Badge>
           <Badge tone="neutral">{new Date().toLocaleString('zh-CN', { hour12: false })}</Badge>
         </div>
       </header>
@@ -137,7 +151,11 @@ export function ResultPage() {
           </div>
           <div>
             <h3>收藏</h3>
-            <p>你在本库共收藏了 {gained} 道题，可在「我的收藏」集中回顾。</p>
+            <p>
+            {isPlan
+              ? `本次策略练习涉及 ${total} 题，收藏与错题已分别归档。`
+              : `你在本库共收藏了 ${gained} 道题，可在「我的收藏」集中回顾。`}
+          </p>
           </div>
           <div>
             <h3>连续练习</h3>
@@ -150,13 +168,13 @@ export function ResultPage() {
       </section>
 
       <div className="result-actions">
-        <Link to={`/collection/${collection.id}`} className="button button-ghost">
-          返回题库
+        <Link to={backTo} className="button button-ghost">
+          返回
         </Link>
-        <Link to={`/practice/${collection.id}?mode=review`} className="button button-ghost">
-          <RotateCcw /> 错题重练
+        <Link to="/wrong" className="button button-ghost">
+          <RotateCcw /> 错题本
         </Link>
-        <Link to={`/practice/${collection.id}?mode=practice`} className="button button-primary">
+        <Link to={backTo} className="button button-primary">
           再练一次 <ArrowRight />
         </Link>
       </div>
@@ -174,13 +192,20 @@ export function ResultPage() {
         {wrongCount === 0 ? (
           <div className="result-perfect">
             <Trophy />
-            <p>全对。这组题的知识点已经过关，换一组继续扩展边界。</p>
+            <p>
+              {skipped > 0
+                ? `已作答的 ${answered} 题全部正确，还有 ${skipped} 题未作答，建议补齐后再看整体掌握度。`
+                : '全对。这组题的知识点已经过关，换一组继续扩展边界。'}
+            </p>
           </div>
         ) : (
           <div className="result-review-list">
-            {collection.questions
-              .filter((question) => wrongBook[question.id])
+            {history
+              .slice(0, 1)
+              .flatMap(() => Object.values(wrongBook))
               .slice(0, 5)
+              .map((entry) => questionById(entry.questionId))
+              .filter((question): question is NonNullable<typeof question> => Boolean(question))
               .map((question) => (
                 <div key={question.id} className="result-review-item">
                   <span className="review-index mono">Q</span>

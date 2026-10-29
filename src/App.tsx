@@ -3,6 +3,9 @@ import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/layout/AppShell'
 import { HomePage } from './pages/HomePage'
 import { CatalogPage, DomainPage } from './pages/CatalogPage'
+import { GoalsPage, GoalPage } from './pages/GoalsPage'
+import { StrategyPage } from './pages/StrategyPage'
+import { PlanPracticePage } from './pages/PlanPracticePage'
 import { CollectionPage } from './pages/CollectionPage'
 import { PracticePage } from './pages/PracticePage'
 import { ResultPage } from './pages/ResultPage'
@@ -27,6 +30,10 @@ export function App() {
           <Route index element={<HomePage />} />
           <Route path="catalog" element={<CatalogPage />} />
           <Route path="domain/:domainId" element={<DomainPage />} />
+          <Route path="goals" element={<GoalsPage />} />
+          <Route path="goal/:goalId" element={<GoalPage />} />
+          <Route path="strategy/:kind" element={<StrategyPage />} />
+          <Route path="practice-plan/:kind" element={<PlanPracticePage />} />
           <Route path="collection/:collectionId" element={<CollectionPage />} />
           <Route path="practice/:collectionId" element={<PracticePage />} />
           <Route path="result/:collectionId" element={<ResultPage />} />

@@ -24,7 +24,11 @@ function resolveTitle(pathname: string): string {
   }
   if (pathname.startsWith('/collection/')) return '题库详情'
   if (pathname.startsWith('/practice/')) return '答题练习'
+  if (pathname.startsWith('/practice-plan/')) return '策略练习'
   if (pathname.startsWith('/result/')) return '练习结果'
+  if (pathname === '/goals') return '目标方案'
+  if (pathname.startsWith('/goal/')) return '备考路线'
+  if (pathname.startsWith('/strategy/')) return '练习策略'
   return '题屿'
 }
 
@@ -63,7 +67,10 @@ export function AppShell() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  if (location.pathname.startsWith('/practice/')) {
+  if (
+    location.pathname.startsWith('/practice/') ||
+    location.pathname.startsWith('/practice-plan/')
+  ) {
     return (
       <>
         <Outlet />

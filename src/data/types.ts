@@ -57,9 +57,18 @@ export interface Domain {
   index: string
 }
 
+export interface Track {
+  id: string
+  domainId: DomainId
+  name: string
+  short: string
+  description: string
+}
+
 export interface Collection {
   id: string
   domainId: DomainId
+  trackId: string
   title: string
   subtitle: string
   description: string
@@ -70,6 +79,25 @@ export interface Collection {
   heat: number
   tags: string[]
   updated: string
+}
+
+export interface GoalStep {
+  collectionId: string
+  phase: string
+  note: string
+}
+
+export interface Goal {
+  id: string
+  title: string
+  audience: string
+  outcome: string
+  durationWeeks: number
+  intensity: '轻量' | '标准' | '冲刺'
+  accent: string
+  icon: IconKey
+  keywords: string[]
+  steps: GoalStep[]
 }
 
 export interface Question {
