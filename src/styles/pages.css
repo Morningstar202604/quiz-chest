@@ -3358,3 +3358,37 @@
     flex: 1 1 80px;
   }
 }
+
+.wrong-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.wrong-filter select {
+  max-width: 220px;
+  padding: 7px 28px 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.wrong-filter select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+@media (max-width: 560px) {
+  .wrong-filter {
+    width: 100%;
+  }
+
+  .wrong-filter select {
+    flex: 1;
+    max-width: none;
+  }
+}

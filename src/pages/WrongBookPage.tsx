@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getQuestion } from '../data'
 import { useAppStore } from '../store/useAppStore'
+import { useLibraryCollections } from '../lib/library'
 import { formatRelativeTime, LETTERS, typeLabel } from '../lib/quiz'
 import { Badge, EmptyState } from '../components/ui/primitives'
 import { ArrowRight, Bookmark, Target, RotateCcw, Trash2 } from '../components/ui/icons'
@@ -13,15 +14,25 @@ export function WrongBookPage() {
   const removeWrong = useAppStore((state) => state.removeWrong)
   const clearWrongBook = useAppStore((state) => state.clearWrongBook)
   const toggleFavorite = useAppStore((state) => state.toggleFavorite)
+  const library = useLibraryCollections()
   const [expanded, setExpanded] = useState<string | null>(null)
   const [sort, setSort] = useState<'recent' | 'count'>('recent')
+  const [collectionFilter, setCollectionFilter] = useState('all')
+
+  const collectionOptions = useMemo(() => {
+    const ids = new Set(Object.values(wrongBook).map((entry) => entry.collectionId))
+    return library.filter((collection) => ids.has(collection.id))
+  }, [library, wrongBook])
 
   const entries = useMemo(() => {
-    const list = Object.values(wrongBook).filter((entry) => getQuestion(entry.questionId))
+    const list = Object.values(wrongBook).filter(
+      (entry) => getQuestion(entry.questionId) &&
+        (collectionFilter === 'all' || entry.collectionId === collectionFilter),
+    )
     return list.sort((a, b) =>
       sort === 'count' ? b.wrongCount - a.wrongCount : b.lastWrongAt - a.lastWrongAt,
     )
-  }, [wrongBook, sort])
+  }, [wrongBook, sort, collectionFilter])
 
   if (entries.length === 0) {
     return (
@@ -53,6 +64,24 @@ export function WrongBookPage() {
           <p className="page-sub">按错误次数或最近出错排序，逐题回顾解析，标记掌握后自动移出。</p>
         </div>
         <div className="page-head-actions">
+          <label className="wrong-filter">
+            <span>题库</span>
+            <select
+              value={collectionFilter}
+              onChange={(event) => {
+                setCollectionFilter(event.target.value)
+                setExpanded(null)
+              }}
+              aria-label="按题库筛选错题"
+            >
+              <option value="all">全部题库（{Object.keys(wrongBook).length}）</option>
+              {collectionOptions.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.title}（{Object.values(wrongBook).filter((entry) => entry.collectionId === collection.id).length}）
+                </option>
+              ))}
+            </select>
+          </label>
           <div className="segmented">
             <button className={sort === 'recent' ? 'active' : ''} onClick={() => setSort('recent')}>
               最近出错
@@ -72,6 +101,13 @@ export function WrongBookPage() {
         </div>
       </header>
 
+      {entries.length === 0 ? (
+        <EmptyState
+          icon={<Target />}
+          title="这个题库没有错题"
+          description="切换筛选题库，或继续练习后再回来复习。"
+        />
+      ) : (
       <div className="wrong-list">
         {entries.map((entry) => {
           const question = getQuestion(entry.questionId)!
@@ -140,6 +176,7 @@ export function WrongBookPage() {
           )
         })}
       </div>
+      )}
 
       <div className="wrong-foot">
         <Link to="/catalog" className="button button-primary button-sm">
