@@ -85,3 +85,7 @@ export function parseExportPackage(raw: string): { bank: ImportedBank | null; er
     error: '',
   }
 }
+
+export function looksLikeExportPackage(raw: string): boolean {
+  return raw.includes('"tiyu-bank"')
+}

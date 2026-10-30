@@ -9,6 +9,7 @@ import {
   type ImportIssue,
   type ParseResult,
 } from '../lib/importer'
+import { looksLikeExportPackage, parseExportPackage } from '../lib/exporter'
 import { Badge, EmptyState } from '../components/ui/primitives'
 import { ArrowRight, BookOpen, CircleCheck, CircleX, Library, Upload } from '../components/ui/icons'
 
@@ -31,9 +32,36 @@ export function ImportPage() {
   const runParse = (text: string, name: string) => {
     setError('')
     setResult(null)
+    if (looksLikeExportPackage(text)) {
+      const pkg = parseExportPackage(text)
+      if (pkg.bank) {
+        const issues: ImportIssue[] = []
+        const parsed: ParseResult = {
+          bank: {
+            title: pkg.bank.title,
+            subtitle: pkg.bank.subtitle,
+            description: pkg.bank.description,
+            exam: pkg.bank.exam,
+            icon: pkg.bank.icon,
+            accent: pkg.bank.accent,
+            level: pkg.bank.level,
+            durationMin: pkg.bank.durationMin,
+            tags: pkg.bank.tags,
+            questions: pkg.bank.questions,
+          },
+          issues,
+          questionCount: pkg.bank.questions.length,
+        }
+        setResult(parsed)
+        setStep('review')
+        return
+      }
+      setError(pkg.error)
+      return
+    }
     const format = detectFormat(name)
     if (!format) {
-      setError('仅支持 .json 或 .csv 文件')
+      setError('仅支持 .json / .csv 文件或题屿题库包（.tiyu.json）')
       return
     }
     if (text.trim().length === 0) {
@@ -208,7 +236,7 @@ export function ImportPage() {
         <input
           ref={fileRef}
           type="file"
-          accept=".json,.csv,text/csv,application/json"
+          accept=".json,.csv,.tiyu.json,text/csv,application/json"
           className="visually-hidden"
           onChange={(event) => onFile(event.target.files?.[0] ?? undefined)}
         />

@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { useAppStore } from '../store/useAppStore'
 import { collections } from '../data/taxonomy'
-import { totalQuestions } from '../data'
-import { ArrowRight, Menu, Settings, Sun, Moon, RotateCcw, Upload } from '../components/ui/icons'
+import { getQuestion, totalQuestions } from '../data'
+import { collectionTitleOf } from '../lib/search'
+import { dateStamp, downloadCsv, historyToCsv, wrongBookToCsv } from '../lib/csvExport'
+import { ArrowRight, Download, Menu, Settings, Sun, Moon, RotateCcw, Upload } from '../components/ui/icons'
 
 export function SettingsPage() {
   const settings = useAppStore((state) => state.settings)
@@ -155,6 +157,42 @@ export function SettingsPage() {
           <div>
             <strong className="mono">{history.length}</strong>
             <span>练习记录</span>
+          </div>
+        </div>
+        <div className="settings-row">
+          <div>
+            <strong>导出练习数据</strong>
+            <p>成绩记录与错题清单导出为 CSV，可用 Excel 打开，跨设备留档。</p>
+          </div>
+          <div className="settings-row-actions">
+            <button
+              className="button button-ghost button-sm"
+              disabled={history.length === 0}
+              onClick={() => downloadCsv(`成绩记录-${dateStamp()}.csv`, historyToCsv(history))}
+            >
+              <Download /> 成绩
+            </button>
+            <button
+              className="button button-ghost button-sm"
+              disabled={Object.keys(wrongBook).length === 0}
+              onClick={() =>
+                downloadCsv(
+                  `错题清单-${dateStamp()}.csv`,
+                  wrongBookToCsv(
+                    wrongBook,
+                    (id) => {
+                      const question = getQuestion(id)
+                      return question
+                        ? { stem: question.stem, collectionId: question.collectionId, wrongCount: wrongBook[id]?.wrongCount ?? 0, lastWrongAt: wrongBook[id]?.lastWrongAt ?? 0 }
+                        : undefined
+                    },
+                    (collectionId) => collectionTitleOf(collectionId) || '我的题库',
+                  ),
+                )
+              }
+            >
+              <Download /> 错题
+            </button>
           </div>
         </div>
         <div className="settings-row">

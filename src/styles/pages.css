@@ -3174,3 +3174,9 @@
     font-size: 11.5px;
   }
 }
+
+.settings-row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
