@@ -3180,3 +3180,181 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+
+/* ===== 自定义组卷 ===== */
+
+.compose-page {
+  max-width: 860px;
+}
+
+.compose-section {
+  margin-bottom: var(--space-6, 32px);
+}
+
+.compose-banks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.compose-bank {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md, 10px);
+  background: var(--paper-raised);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.compose-bank:hover {
+  border-color: var(--accent);
+}
+
+.compose-bank.active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--paper);
+}
+
+.compose-bank-icon {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #fff;
+}
+
+.compose-bank-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.compose-bank-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.compose-bank-text strong {
+  font-size: 13.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compose-bank-text small {
+  font-size: 11.5px;
+  color: var(--ink-muted);
+}
+
+.compose-bank > svg {
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.compose-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.compose-chip {
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.compose-chip:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.compose-chip.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.compose-chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.compose-number {
+  width: 84px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--paper-raised);
+  font-size: 13px;
+}
+
+.compose-number:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.compose-order {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.compose-warn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold, #9b7420);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.compose-warn svg {
+  width: 14px;
+  height: 14px;
+  color: var(--gold, #9b7420);
+}
+
+.compose-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 560px) {
+  .compose-actions {
+    flex-direction: column-reverse;
+  }
+
+  .compose-actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .compose-banks {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .compose-number {
+    flex: 1 1 80px;
+  }
+}

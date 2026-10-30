@@ -22,7 +22,7 @@ export function ResultPage() {
   const { collectionId = '' } = useParams()
   const [searchParams] = useSearchParams()
   const decodedId = decodeURIComponent(collectionId)
-  const isPlan = decodedId.startsWith('plan:')
+  const isPlan = decodedId.startsWith('plan:') || decodedId.startsWith('compose:')
   const collection = isPlan ? undefined : getCollection(decodedId)
   const history = useAppStore((state) => state.history)
   const wrongBook = useAppStore((state) => state.wrongBook)

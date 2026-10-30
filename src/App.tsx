@@ -15,6 +15,8 @@ import { HistoryPage } from './pages/HistoryPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ImportPage } from './pages/ImportPage'
 import { LibraryPage } from './pages/LibraryPage'
+import { ComposePage } from './pages/ComposePage'
+import { ComposeRunPage } from './pages/ComposeRunPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
 const StatsPage = lazy(() =>
@@ -34,6 +36,8 @@ export function App() {
           <Route path="domain/:domainId" element={<DomainPage />} />
           <Route path="library" element={<LibraryPage />} />
           <Route path="import" element={<ImportPage />} />
+          <Route path="compose" element={<ComposePage />} />
+          <Route path="compose-run" element={<ComposeRunPage />} />
           <Route path="goals" element={<GoalsPage />} />
           <Route path="goal/:goalId" element={<GoalPage />} />
           <Route path="strategy/:kind" element={<StrategyPage />} />

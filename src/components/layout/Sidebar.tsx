@@ -8,6 +8,7 @@ import {
   Bookmark,
   Flame,
   House,
+  Layers,
   LayoutGrid,
   Library,
   ListChecks,
@@ -84,6 +85,14 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <Upload />
           我的题库
           {bankCount > 0 ? <span className="nav-count">{bankCount}</span> : null}
+        </NavLink>
+        <NavLink
+          to="/compose"
+          className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          onClick={onClose}
+        >
+          <Layers />
+          自定义组卷
         </NavLink>
       </nav>
 
@@ -166,7 +175,10 @@ export function MobileNav() {
       to: '/library',
       label: '我的',
       icon: Upload,
-      match: pathname.startsWith('/library') || pathname.startsWith('/import'),
+      match:
+        pathname.startsWith('/library') ||
+        pathname.startsWith('/import') ||
+        pathname.startsWith('/compose'),
     },
     {
       to: '/strategy/daily',
