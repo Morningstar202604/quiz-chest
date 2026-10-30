@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAppStore } from '../store/useAppStore'
 import { useLibraryCollections } from '../lib/library'
+import { downloadBankPackage } from '../lib/exporter'
 import { Badge, EmptyState } from '../components/ui/primitives'
 import { DomainIcon } from '../components/ui/icons'
 import {
@@ -9,6 +10,7 @@ import {
   ChevronRight,
   CircleCheck,
   Clock,
+  Download,
   Library as LibraryIcon,
   Trash2,
   Upload,
@@ -86,6 +88,15 @@ export function LibraryPage() {
                 <Link to={`/practice/${collection.id}?mode=practice`} className="button button-ghost button-sm">
                   开始练习
                 </Link>
+                <button
+                  className="button button-ghost button-sm"
+                  onClick={() => {
+                    const bank = banks.find((item) => item.id === collection.id)
+                    if (bank) downloadBankPackage(bank)
+                  }}
+                >
+                  <Download /> 导出
+                </button>
                 <button
                   className="button button-ghost button-sm library-delete"
                   onClick={() => {
