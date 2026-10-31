@@ -99,7 +99,7 @@ Windows 推荐在 Git Bash 中执行 `scripts/build-desktop.cmd`：脚本会自�
 
 桌面端注意事项：
 
-1. 原生壳构建时设置 `VITE_ROUTER=hash`（见 `src/App.tsx`），改用 `HashRouter`，避免本地静态服务器缺少 SPA 回退导致深层路由 404。Web 部署保持默认的 `BrowserRouter`。
+1. 原生壳构建时执行 `pnpm build:native`（Vite 的 `native` 模式，见 `src/App.tsx`），改用 `HashRouter` 并关闭 PWA，避免本地静态服务器缺少 SPA 回退导致深层路由 404。Web 部署保持默认的 `BrowserRouter`。
 2. 本地数据存于 WebView 的 localStorage，卸载应用即丢失。需要持久化到文件时，接 Tauri 的 `@tauri-apps/plugin-store`，把 `useAppStore` 的 `persist` storage 换成插件实现。
 3. 想加系统托盘、开机启动、自动更新，均在 `src-tauri` 内配置，不影响前端代码。
 
@@ -109,7 +109,7 @@ Windows 推荐在 Git Bash 中执行 `scripts/build-desktop.cmd`：脚本会自�
 
 | 组件 | 路径 | 版本 |
 | --- | --- | --- |
-| Android SDK | `C:\Devndroid-sdk` | cmdline-tools 12.0 / platform 35 + 36 / build-tools 35.0.0 |
+| Android SDK | `C:\Dev\android-sdk` | cmdline-tools 12.0 / platform 35 + 36 / build-tools 35.0.0 |
 | JDK | `C:\Dev\jdk-21` | OpenJDK 21.0.2 |
 | Gradle | `C:\Dev\gradle-8.14.3\gradle-8.14.3` | 8.14.3（镜像下载） |
 | Gradle 用户目录 | `C:\Dev\gradle-home` | 含阿里云镜像 init 脚本 |
@@ -117,7 +117,7 @@ Windows 推荐在 Git Bash 中执行 `scripts/build-desktop.cmd`：脚本会自�
 构建命令（本机实测通过）：
 
 ```bash
-export ANDROID_HOME='C:\Devndroid-sdk'
+export ANDROID_HOME='C:\Dev\android-sdk'
 export JAVA_HOME='C:\Dev\jdk-21'
 export GRADLE_USER_HOME='C:\Dev\gradle-home'
 pnpm build:native
@@ -171,8 +171,9 @@ cd android
 
 1. 顶部状态栏与底部手势区：已在 `src/styles/layout.css`、`practice.css` 使用 `env(safe-area-inset-bottom)` 预留安全区。
 2. Android 返回键默认会退出应用。需要「返回上一页」时安装 `@capacitor/app`，监听 `backButton` 事件并调用 `history.back()`。
-3. 若后续接后端，需要在 `capacitor.config.ts` 的 `server.allowNavigation` 里放行 API 域名，或改用 `@capacitor/http`。
-4. 状态栏配色可用 `@capacitor/status-bar` 跟随主题切换。
+3. Android 应用在 `android/app/src/main/AndroidManifest.xml` 保持 `android:allowBackup="false"`，并用 `android/app/src/main/res/xml/backup_rules.xml` 覆盖旧版备份规则；Android 12+ 通过 `android/app/src/main/res/xml/data_extraction_rules.xml` 对 `cloud-backup` 与 `device-transfer` 均排除 `domain="root"`。题库数据迁移请使用应用内的题库包导出/导入流程（`src/lib/exporter.ts`、`src/pages/LibraryPage.tsx`、`src/pages/ImportPage.tsx`）。
+4. 若后续接后端，需要在 `capacitor.config.ts` 的 `server.allowNavigation` 里放行 API 域名，或改用 `@capacitor/http`。
+5. 状态栏配色可用 `@capacitor/status-bar` 跟随主题切换。
 
 ## 五、iOS（可选，同一套 Capacitor 工程）
 

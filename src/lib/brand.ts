@@ -13,7 +13,7 @@ export const DEFAULT_BRAND: BrandConfig = {
   logoMark: '题',
   accent: '#a8442a',
   accentSoft: '#f3e3dc',
-  footerNote: '七大领域 · 32 个题库 · 离线可用',
+  footerNote: '导入自有题库 · 离线练习 · 数据留在本机',
 }
 
 const HEX = /^#[0-9a-fA-F]{6}$/

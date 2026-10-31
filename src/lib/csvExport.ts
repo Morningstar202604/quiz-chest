@@ -3,7 +3,11 @@ import type { HistoryEntry, WrongEntry } from '../store/useAppStore'
 export function toCsv(headers: string[], rows: Array<Array<string | number>>): string {
   const escape = (value: string | number): string => {
     const text = String(value)
-    return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
+    const safeText =
+      typeof value === 'string' && /^\s*[=+\-@＝＋－＠]/.test(text)
+        ? `'${text}`
+        : text
+    return /[",\n\r]/.test(safeText) ? `"${safeText.replace(/"/g, '""')}"` : safeText
   }
   const lines = [headers.map(escape).join(',')]
   for (const row of rows) {

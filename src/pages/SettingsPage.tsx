@@ -217,8 +217,8 @@ export function SettingsPage() {
           <span>版本 1.0.0</span>
         </div>
         <p className="about-copy">
-          题屿是一个跨端刷题应用：同一份 React + TypeScript 代码可在浏览器、桌面（Tauri）
-          与安卓（Capacitor）中运行。题库按七大领域、32 个题库组织，离线优先，数据留在本机。
+          题屿是一个本地优先的题库应用：导入自有题库后，可在浏览器、桌面（Tauri）或安卓（Capacitor）
+          中离线练习、模拟考试和复习错题。学习数据保存在本机，不上传、不需要注册。
         </p>
         <div className="about-links">
           <Link to="/catalog" className="text-link">

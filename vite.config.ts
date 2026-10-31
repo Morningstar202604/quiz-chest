@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: '题屿 · 万象题库',
         short_name: '题屿',
-        description: '七大领域、32 个题库的跨端刷题应用',
+        description: '导入自有题库，离线完成练习、模拟考试、错题复习与学习统计',
         lang: 'zh-CN',
         theme_color: '#f4f0e7',
         background_color: '#f4f0e7',

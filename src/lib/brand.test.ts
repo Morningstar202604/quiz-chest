@@ -7,6 +7,10 @@ describe('normalizeBrand', () => {
     expect(normalizeBrand('x')).toEqual(DEFAULT_BRAND)
   })
 
+  it('keeps the default footer aligned with the product positioning', () => {
+    expect(DEFAULT_BRAND.footerNote).toBe('导入自有题库 · 离线练习 · 数据留在本机')
+  })
+
   it('accepts a full custom brand', () => {
     const brand = normalizeBrand({
       productName: '教研通',

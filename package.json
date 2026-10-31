@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "题屿 · 万象题库 — 跨端刷题应用",
+  "description": "题屿 · 万象题库 — 本地优先的自有题库练习应用",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

@@ -25,6 +25,17 @@ describe('toCsv', () => {
     expect(csv.split('\r\n')[1]).toBe('"含,逗号","含""引号"""')
   })
 
+  it('neutralizes formula-like text after control prefixes and preserves CSV quoting', () => {
+    const csv = toCsv(
+      ['=标题'],
+      [['=SUM(A1,B1)', '+命令', '-文本', '@用户', '＝全角等号', '＋全角加号', '－全角减号', '＠全角艾特', '\uFEFF＝BOM', '\t=TAB', '\r=CR', '\n=LF', ' \t=空白', -1]],
+    )
+
+    expect(csv).toBe(
+      `'=标题\r\n"'=SUM(A1,B1)",'+命令,'-文本,'@用户,'＝全角等号,'＋全角加号,'－全角减号,'＠全角艾特,'\uFEFF＝BOM,'\t=TAB,"'\r=CR","'\n=LF",' \t=空白,-1\r\n`,
+    )
+  })
+
   it('ends with CRLF', () => {
     const csv = toCsv(['a'], [['1']])
     expect(csv.endsWith('\r\n')).toBe(true)
