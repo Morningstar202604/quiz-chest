@@ -63,6 +63,10 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  server: { port: 5173, host: true },
+  server: {
+    port: 5173,
+    host: true,
+    watch: { ignored: ['**/src-tauri/target/**', '**/android/**'] },
+  },
   preview: { port: 4173, host: true },
 }))

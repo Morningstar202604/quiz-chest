@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { buildExportPackage, exportFileName, looksLikeExportPackage, parseExportPackage } from './exporter'
+import {
+  BANK_PACKAGE_VERSION,
+  buildExportPackage,
+  exportFileName,
+  looksLikeExportPackage,
+  parseExportPackage,
+} from './exporter'
 import { parseImportJson } from './importer'
 import type { ImportedBank } from '../store/useAppStore'
 
@@ -32,7 +38,7 @@ describe('buildExportPackage', () => {
   it('wraps bank with tiyu-bank format marker', () => {
     const pkg = buildExportPackage(bank)
     expect(pkg.format).toBe('tiyu-bank')
-    expect(pkg.version).toBe(1)
+    expect(pkg.version).toBe(BANK_PACKAGE_VERSION)
     expect(pkg.bank.title).toBe(bank.title)
     expect(pkg.bank.questions).toHaveLength(1)
     expect(pkg.exportedAt).toBeTruthy()
@@ -55,9 +61,73 @@ describe('parseExportPackage', () => {
     const raw = JSON.stringify(buildExportPackage(bank))
     const result = parseExportPackage(raw)
     expect(result.error).toBe('')
+    expect(result.warnings).toHaveLength(0)
+    expect(result.version).toBe(BANK_PACKAGE_VERSION)
     expect(result.bank?.title).toBe(bank.title)
     expect(result.bank?.questions[0].answer).toEqual([1])
     expect(result.bank?.level).toBe('进阶')
+  })
+
+  it('upgrades a v1 package with defaults and reports a warning', () => {
+    const raw = JSON.stringify({
+      format: 'tiyu-bank',
+      version: 1,
+      bank: {
+        title: '旧版题库',
+        questions: [
+          {
+            type: 'single',
+            stem: '旧版题目',
+            options: ['甲', '乙'],
+            answer: [0],
+            explanation: '旧版解析内容足够长。',
+            difficulty: 2,
+          },
+        ],
+      },
+    })
+    const result = parseExportPackage(raw)
+    expect(result.bank?.title).toBe('旧版题库')
+    expect(result.bank?.icon).toBe('book')
+    expect(result.bank?.durationMin).toBe(10)
+    expect(result.bank?.tags).toEqual([])
+    expect(result.version).toBe(1)
+    expect(result.warnings[0]).toContain('v1')
+  })
+
+  it('rejects a package version newer than supported', () => {
+    const raw = JSON.stringify({
+      format: 'tiyu-bank',
+      version: BANK_PACKAGE_VERSION + 1,
+      bank: { title: 'x', questions: [{ stem: 's' }] },
+    })
+    const result = parseExportPackage(raw)
+    expect(result.bank).toBeNull()
+    expect(result.error).toContain('高于当前支持')
+    expect(result.version).toBe(BANK_PACKAGE_VERSION + 1)
+  })
+
+  it('treats a package without version as v1', () => {
+    const raw = JSON.stringify({
+      format: 'tiyu-bank',
+      bank: {
+        title: '无版本号',
+        questions: [
+          {
+            type: 'single',
+            stem: '无版本题目',
+            options: ['甲', '乙'],
+            answer: [0],
+            explanation: '无版本解析内容足够长。',
+            difficulty: 2,
+          },
+        ],
+      },
+    })
+    const result = parseExportPackage(raw)
+    expect(result.bank?.title).toBe('无版本号')
+    expect(result.version).toBe(1)
+    expect(result.warnings).toHaveLength(1)
   })
 
   it('rejects plain question JSON without tiyu-bank marker', () => {

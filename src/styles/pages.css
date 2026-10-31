@@ -3392,3 +3392,59 @@
     max-width: none;
   }
 }
+
+.compose-history {
+  margin-top: var(--space-6, 32px);
+  padding-top: var(--space-4, 20px);
+  border-top: 1px solid var(--line);
+}
+
+.compose-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compose-history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--paper-raised);
+}
+
+.compose-history-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.compose-history-main strong {
+  font-size: 13.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compose-history-main small {
+  font-size: 11.5px;
+  color: var(--ink-muted);
+}
+
+.compose-history-row .icon-button {
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .compose-history-row {
+    flex-wrap: wrap;
+  }
+
+  .compose-history-main {
+    flex-basis: 100%;
+  }
+}

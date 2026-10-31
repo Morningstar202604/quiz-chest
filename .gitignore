@@ -16,4 +16,6 @@ android/local.properties
 android/hs_err_pid*.log
 .gradle-home/
 artifacts/*.apk
+artifacts/*.exe
+artifacts/*.msi
 .aqg/

@@ -43,6 +43,16 @@ export interface HistoryEntry {
   dateKey: string
 }
 
+export interface PaperRecord {
+  id: string
+  title: string
+  collectionIds: string[]
+  count: number
+  durationMin: number
+  order: 'random' | 'sequence'
+  createdAt: number
+}
+
 export interface DailyStat {
   date: string
   answered: number
@@ -80,6 +90,9 @@ interface AppState {
   setLastCollection: (collectionId: string) => void
   addBank: (bank: ImportedBank) => void
   removeBank: (bankId: string) => void
+  papers: PaperRecord[]
+  addPaper: (paper: PaperRecord) => void
+  removePaper: (paperId: string) => void
   resetProgress: () => void
 }
 
@@ -101,6 +114,7 @@ export const useAppStore = create<AppState>()(
       lastCollectionId: null,
       banks: [],
       banksVersion: 0,
+      papers: [],
 
       setTheme: (theme) => set((state) => ({ settings: { ...state.settings, theme } })),
       toggleTheme: () =>
@@ -185,6 +199,14 @@ export const useAppStore = create<AppState>()(
           banksVersion: state.banksVersion + 1,
         })),
 
+      addPaper: (paper) =>
+        set((state) => ({
+          papers: [paper, ...state.papers.filter((item) => item.id !== paper.id)].slice(0, 20),
+        })),
+
+      removePaper: (paperId) =>
+        set((state) => ({ papers: state.papers.filter((item) => item.id !== paperId) })),
+
       resetProgress: () =>
         set({
           favorites: [],
@@ -196,7 +218,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'tiyu-store-v1',
-      version: 2,
+      version: 3,
       migrate: (persisted, version) => {
         const fallback = {
           settings: initialSettings,
@@ -207,6 +229,7 @@ export const useAppStore = create<AppState>()(
           lastCollectionId: null as string | null,
           banks: [] as ImportedBank[],
           banksVersion: 0,
+          papers: [] as PaperRecord[],
         }
         if (version < 1 || typeof persisted !== 'object' || persisted === null) {
           return fallback
@@ -222,6 +245,7 @@ export const useAppStore = create<AppState>()(
           lastCollectionId: data.lastCollectionId ?? null,
           banks: data.banks ?? fallback.banks,
           banksVersion: data.banksVersion ?? 0,
+          papers: data.papers ?? fallback.papers,
         }
       },
       partialize: (state) => ({
@@ -233,6 +257,7 @@ export const useAppStore = create<AppState>()(
         lastCollectionId: state.lastCollectionId,
         banks: state.banks,
         banksVersion: state.banksVersion,
+        papers: state.papers,
       }),
     },
   ),

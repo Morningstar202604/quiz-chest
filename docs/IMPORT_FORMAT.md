@@ -112,3 +112,52 @@ CSV 不带题库元数据，导入后默认标题为「未命名题库」（可�
 - 导入的题库存放在浏览器 `localStorage`（键 `tiyu-store-v1`，结构版本 2）。
 - 删除题库：「我的题库」→ 题库卡「删除」。学习记录不随之删除，但题目引用会失效。
 - 「设置 → 显示示例题库」可隐藏内置示例内容，只显示你自己的题库。
+
+## 题屿题库包（tiyu-bank）
+
+当前包版本为 **v2**。旧版 v1 包可直接导入，应用会在预览时自动迁移并提示版本升级；高于当前版本的包会被拒绝，防止字段静默丢失。
+
+从「我的题库」导出的文件使用 `.tiyu.json` 扩展名，包顶层包含：
+
+```json
+{
+  "format": "tiyu-bank",
+  "version": 2,
+  "exportedAt": "2026-10-31T00:00:00.000Z",
+  "bank": { "title": "我的题库", "questions": [] }
+}
+```
+
+当前支持 `version: 1` 和 `version: 2`：
+
+- v1 导入时自动补齐 v2 默认字段，并在预览页显示升级提示。
+- 高于当前版本的包会拒绝导入，避免静默丢字段。
+- 普通 JSON 导入与 `tiyu-bank` 包导入走不同校验路径。
+
+## 白标配置
+
+白标部署不需要修改源码。支持编译期环境变量和运行时全局配置；运行时配置优先级更高。
+
+| 配置 | 环境变量 | 默认 |
+| --- | --- | --- |
+| 产品名 | `VITE_BRAND_NAME` | 题屿 |
+| 英文副标题 | `VITE_BRAND_EN` | TIYU BANK |
+| Logo 字符 | `VITE_BRAND_MARK` | 题 |
+| 主色 | `VITE_BRAND_ACCENT` | `#a8442a` |
+| 浅色背景 | `VITE_BRAND_ACCENT_SOFT` | `#f3e3dc` |
+| 页脚文案 | `VITE_BRAND_FOOTER` | 七大领域 · 32 个题库 · 离线可用 |
+
+运行时注入示例：
+
+```html
+<script>
+  window.__TIYU_BRAND__ = {
+    productName: '教研通',
+    productEn: 'JIAOYAN',
+    logoMark: '研',
+    accent: '#1F7A5C',
+    accentSoft: '#DFF0E8',
+    footerNote: '内部培训专用'
+  }
+</script>
+```

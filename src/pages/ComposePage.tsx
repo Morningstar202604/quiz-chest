@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAppStore } from '../store/useAppStore'
+import { useAppStore, type PaperRecord } from '../store/useAppStore'
 import {
   availableQuestionCount,
   buildCustomPaper,
@@ -14,13 +14,17 @@ import {
   DURATION_PRESETS,
 } from '../lib/customPaper'
 import type { CustomPaperSpec } from '../lib/customPaper'
+import { formatRelativeTime } from '../lib/quiz'
 import { EmptyState } from '../components/ui/primitives'
 import { DomainIcon } from '../components/ui/icons'
-import { ArrowRight, BookOpen, CircleCheck, CircleX, Layers, Trophy } from '../components/ui/icons'
+import { ArrowRight, BookOpen, CircleCheck, CircleX, Layers, RotateCcw, Trash2, Trophy } from '../components/ui/icons'
 
 export function ComposePage() {
   const navigate = useNavigate()
   const banks = useAppStore((state) => state.banks)
+  const papers = useAppStore((state) => state.papers)
+  const addPaper = useAppStore((state) => state.addPaper)
+  const removePaper = useAppStore((state) => state.removePaper)
   const [selected, setSelected] = useState<string[]>([])
   const [count, setCount] = useState<number>(20)
   const [durationMin, setDurationMin] = useState<number>(30)
@@ -38,6 +42,16 @@ export function ComposePage() {
     const spec: CustomPaperSpec = { collectionIds: selected, count: effectiveCount, durationMin, order }
     const paper = buildCustomPaper(spec)
     if (paper.questions.length === 0) return
+    const now = Date.now()
+    addPaper({
+      id: `paper_${now}`,
+      title: paper.title,
+      collectionIds: selected,
+      count: paper.questions.length,
+      durationMin,
+      order,
+      createdAt: now,
+    })
     navigate('/compose-run', {
       state: {
         questions: paper.questions,
@@ -46,6 +60,13 @@ export function ComposePage() {
         bankIds: selected,
       },
     })
+  }
+
+  const reopen = (record: PaperRecord) => {
+    setSelected(record.collectionIds.filter((id) => banks.some((bank) => bank.id === id)))
+    setCount(record.count)
+    setDurationMin(record.durationMin)
+    setOrder(record.order)
   }
 
   if (noBanks) {
@@ -193,6 +214,39 @@ export function ComposePage() {
           <Trophy /> 模拟考试（{effectiveCount} 题 · {durationMin} 分钟）
         </button>
       </section>
+
+      {papers.length > 0 ? (
+        <section className="compose-history">
+          <div className="section-head">
+            <h2 className="section-title serif">最近组卷</h2>
+            <span>最多保留 20 条，点「重开」恢复同一配置</span>
+          </div>
+          <div className="compose-history-list">
+            {papers.map((record) => (
+              <div className="compose-history-row" key={record.id}>
+                <span className="compose-history-main">
+                  <strong>{record.title}</strong>
+                  <small>
+                    {record.count} 题 · {record.durationMin} 分钟 ·{' '}
+                    {record.order === 'random' ? '随机顺序' : '题库顺序'} ·{' '}
+                    {formatRelativeTime(record.createdAt)}
+                  </small>
+                </span>
+                <button className="button button-ghost button-sm" onClick={() => reopen(record)}>
+                  <RotateCcw /> 重开
+                </button>
+                <button
+                  className="icon-button"
+                  aria-label={`删除 ${record.title}`}
+                  onClick={() => removePaper(record.id)}
+                >
+                  <Trash2 />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   )
 }

@@ -35,7 +35,11 @@ export function ImportPage() {
     if (looksLikeExportPackage(text)) {
       const pkg = parseExportPackage(text)
       if (pkg.bank) {
-        const issues: ImportIssue[] = []
+        const issues: ImportIssue[] = pkg.warnings.map((message) => ({
+          line: 0,
+          field: 'version',
+          message,
+        }))
         const parsed: ParseResult = {
           bank: {
             title: pkg.bank.title,
@@ -176,7 +180,7 @@ export function ImportPage() {
               {result.issues.map((issue, index) => (
                 <li key={issueKey(issue, index)}>
                   <CircleX />
-                  <span className="mono">第 {issue.line} 行</span>
+                  <span className="mono">{issue.line > 0 ? `第 ${issue.line} 行` : '格式提示'}</span>
                   <span className="import-issue-field">{issue.field}</span>
                   <span>{issue.message}</span>
                 </li>

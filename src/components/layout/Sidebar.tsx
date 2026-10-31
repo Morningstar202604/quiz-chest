@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 
 import { goals } from '../../data/goals'
 import { useAppStore } from '../../store/useAppStore'
+import { useBrand } from '../../hooks/useBrand'
 import { streakFromDates } from '../../lib/quiz'
 import {
   BarChart3,
@@ -30,14 +31,15 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const bankCount = useAppStore((state) => state.banks.length)
   const daily = useAppStore((state) => state.daily)
   const streak = streakFromDates(Object.keys(daily))
+  const brand = useBrand()
 
   return (
     <aside className={`sidebar${open ? ' open' : ''}`} aria-label="主导航">
       <NavLink to="/" className="brand" onClick={onClose}>
-        <span className="brand-mark serif">题</span>
+        <span className="brand-mark serif">{brand.logoMark}</span>
         <span className="brand-text">
-          <span className="brand-name">题屿</span>
-          <span className="brand-sub">TIYU BANK</span>
+          <span className="brand-name">{brand.productName}</span>
+          <span className="brand-sub">{brand.productEn}</span>
         </span>
       </NavLink>
 
@@ -153,8 +155,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           设置
         </NavLink>
         <p className="sidebar-note">
-          <LayoutGrid style={{ width: 11, height: 11, verticalAlign: '-1px' }} /> 七大领域 · 32
-          个题库 · 离线可用
+          <LayoutGrid style={{ width: 11, height: 11, verticalAlign: '-1px' }} /> {brand.footerNote}
         </p>
       </div>
     </aside>

@@ -43,7 +43,11 @@ location / {
 
 ## 三、桌面端（Tauri 2）
 
-前置：Rust 工具链（`rustup`）、Windows 需 WebView2（Win10/11 自带）、Node 20+。
+状态：**已落地（Windows x64）**。仓库包含 `src-tauri/` 工程、Tauri 配置、图标与桌面构建脚本 `scripts/build-desktop.cmd`。本机已用 Visual Studio 2022 BuildTools + Rust MSVC 工具链验证。
+
+前置：Rust 工具链（`rustup`）、Visual Studio C++ Build Tools、Windows WebView2（Win10/11 自带）、Node 20+。
+
+首次初始化（新环境或重新生成时）：
 
 ```bash
 pnpm add -D @tauri-apps/cli@2
@@ -81,11 +85,17 @@ pnpm tauri init
 打包命令：
 
 ```bash
-pnpm tauri dev      # 开发热更新
-pnpm tauri build    # 产出安装包
+pnpm desktop:dev             # 开发热更新（适合已配置好 MSVC 的终端）
+pnpm desktop:build            # 产出安装包（同样需要 MSVC + WiX/NSIS）
+
+# Windows / Git Bash 推荐：脚本自动注入 MSVC 环境
+scripts/build-desktop.cmd --no-bundle  # 仅编译 tiyu-desktop.exe
+scripts/build-desktop.cmd              # 产出 NSIS/MSI 安装包
 ```
 
-产物位置：`src-tauri/target/release/bundle/`（Windows 为 `.msi` / `.exe`，macOS 为 `.dmg`，Linux 为 `.deb` / `.AppImage`）。
+Windows 推荐在 Git Bash 中执行 `scripts/build-desktop.cmd`：脚本会自动查找 Visual Studio C++ Build Tools，注入正确的 MSVC 链接器，再调用本地 Tauri CLI，避免 Git Bash 自带 `link.exe` 抢占。
+
+产物位置：`src-tauri/target/release/bundle/`（Windows NSIS / MSI；本机已验证 NSIS；MSI 需要 WiX 下载）。二进制位于 `src-tauri/target/release/tiyu-desktop.exe`，本项目已复制 NSIS 安装包到 `artifacts/题屿_1.0.0_x64-setup.exe`。
 
 桌面端注意事项：
 
