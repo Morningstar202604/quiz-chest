@@ -1,9 +1,9 @@
 {
-  "name": "tiyu-question-bank",
+  "name": "quiz-chest",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "题屿 · 万象题库 — 本地优先的自有题库练习应用",
+  "description": "题匣 · QuizChest — 本地优先的自有题库练习应用",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

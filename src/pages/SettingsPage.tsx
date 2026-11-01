@@ -213,11 +213,11 @@ export function SettingsPage() {
 
       <section className="settings-group about-group">
         <div className="settings-group-head">
-          <h2 className="serif">关于题屿</h2>
+          <h2 className="serif">关于题匣</h2>
           <span>版本 1.0.0</span>
         </div>
         <p className="about-copy">
-          题屿是一个本地优先的题库应用：导入自有题库后，可在浏览器、桌面（Tauri）或安卓（Capacitor）
+          题匣是一个本地优先的题库应用：导入自有题库后，可在浏览器、桌面（Tauri）或安卓（Capacitor）
           中离线练习、模拟考试和复习错题。学习数据保存在本机，不上传、不需要注册。
         </p>
         <div className="about-links">

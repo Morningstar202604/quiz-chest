@@ -35,7 +35,7 @@ function resolveTitle(pathname: string): string {
   if (pathname === '/goals') return '目标方案'
   if (pathname.startsWith('/goal/')) return '备考路线'
   if (pathname.startsWith('/strategy/')) return '练习策略'
-  return '题屿'
+  return '题匣'
 }
 
 export function AppShell() {
@@ -49,7 +49,7 @@ export function AppShell() {
 
   useEffect(() => {
     applyBrand(brand)
-    document.title = `${brand.productName} · 题库`
+    document.title = `${brand.productName} · ${brand.productEn}`
   }, [brand])
 
   useEffect(() => {

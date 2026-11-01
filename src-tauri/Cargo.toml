@@ -1,8 +1,8 @@
 [package]
 name = "tiyu-desktop"
 version = "1.0.0"
-description = "题屿 · 万象题库 desktop application"
-authors = ["题屿"]
+description = "题匣 · QuizChest desktop application"
+authors = ["QuizChest"]
 license = "MIT"
 repository = ""
 edition = "2024"

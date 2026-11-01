@@ -7,7 +7,9 @@ describe('normalizeBrand', () => {
     expect(normalizeBrand('x')).toEqual(DEFAULT_BRAND)
   })
 
-  it('keeps the default footer aligned with the product positioning', () => {
+  it('keeps the default brand aligned with the product positioning', () => {
+    expect(DEFAULT_BRAND.productName).toBe('题匣')
+    expect(DEFAULT_BRAND.productEn).toBe('QuizChest')
     expect(DEFAULT_BRAND.footerNote).toBe('导入自有题库 · 离线练习 · 数据留在本机')
   })
 

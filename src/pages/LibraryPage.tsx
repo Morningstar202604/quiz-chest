@@ -47,7 +47,7 @@ export function LibraryPage() {
         <EmptyState
           icon={<BookOpen />}
           title="还没有导入题库"
-          description="把散在 Excel / Word / JSON 里的题目导进来，题屿会为它生成练习、模拟考试与统计。"
+          description="将题目整理为 JSON 或 CSV 后导入，即可练习、模拟考试并查看统计。"
           action={
             <Link to="/import" className="button button-primary button-sm">
               立即导入 <ArrowRight />

@@ -65,7 +65,7 @@ export function ImportPage() {
     }
     const format = detectFormat(name)
     if (!format) {
-      setError('仅支持 .json / .csv 文件或题屿题库包（.tiyu.json）')
+      setError('仅支持 .json / .csv 文件或题匣题库包（.tiyu.json）')
       return
     }
     if (text.trim().length === 0) {

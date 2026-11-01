@@ -58,6 +58,7 @@ pnpm tauri init
 
 ```json
 {
+  "identifier": "com.tiyu.questionbank",
   "build": {
     "beforeBuildCommand": "pnpm build:native",
     "beforeDevCommand": "pnpm dev",
@@ -67,7 +68,7 @@ pnpm tauri init
   "app": {
     "windows": [
       {
-        "title": "题屿 · 万象题库",
+        "title": "题匣 · QuizChest",
         "width": 1280,
         "height": 860,
         "minWidth": 960,
@@ -76,7 +77,6 @@ pnpm tauri init
     ]
   },
   "bundle": {
-    "identifier": "com.tiyu.questionbank",
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.ico", "icons/icon.icns"]
   }
 }
@@ -95,7 +95,7 @@ scripts/build-desktop.cmd              # 产出 NSIS/MSI 安装包
 
 Windows 推荐在 Git Bash 中执行 `scripts/build-desktop.cmd`：脚本会自动查找 Visual Studio C++ Build Tools，注入正确的 MSVC 链接器，再调用本地 Tauri CLI，避免 Git Bash 自带 `link.exe` 抢占。
 
-产物位置：`src-tauri/target/release/bundle/`（Windows NSIS / MSI；本机已验证 NSIS；MSI 需要 WiX 下载）。二进制位于 `src-tauri/target/release/tiyu-desktop.exe`，本项目已复制 NSIS 安装包到 `artifacts/题屿_1.0.0_x64-setup.exe`。
+产物位置：`src-tauri/target/release/bundle/`（Windows NSIS / MSI；MSI 需要 WiX 下载）。二进制位于 `src-tauri/target/release/tiyu-desktop.exe`。
 
 桌面端注意事项：
 
@@ -132,7 +132,7 @@ cd android && "C:/Dev/gradle-8.14.3/gradle-8.14.3/bin/gradle" assembleDebug --no
 ```bash
 pnpm add @capacitor/core@8 @capacitor/android@8
 pnpm add -D @capacitor/cli@8
-npx cap init "题屿" "com.tiyu.questionbank" --web-dir dist
+npx cap init "题匣" "com.tiyu.questionbank" --web-dir dist
 pnpm build:native
 npx cap add android
 npx cap sync android
@@ -146,7 +146,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.tiyu.questionbank',
-  appName: '题屿',
+  appName: '题匣',
   webDir: 'dist',
   android: {
     allowMixedContent: false,
@@ -171,7 +171,7 @@ cd android
 
 1. 顶部状态栏与底部手势区：已在 `src/styles/layout.css`、`practice.css` 使用 `env(safe-area-inset-bottom)` 预留安全区。
 2. Android 返回键默认会退出应用。需要「返回上一页」时安装 `@capacitor/app`，监听 `backButton` 事件并调用 `history.back()`。
-3. Android 应用在 `android/app/src/main/AndroidManifest.xml` 保持 `android:allowBackup="false"`，并用 `android/app/src/main/res/xml/backup_rules.xml` 覆盖旧版备份规则；Android 12+ 通过 `android/app/src/main/res/xml/data_extraction_rules.xml` 对 `cloud-backup` 与 `device-transfer` 均排除 `domain="root"`。题库数据迁移请使用应用内的题库包导出/导入流程（`src/lib/exporter.ts`、`src/pages/LibraryPage.tsx`、`src/pages/ImportPage.tsx`）。
+3. Android 应用在 `android/app/src/main/AndroidManifest.xml` 保持 `android:allowBackup="false"`，并用 `android/app/src/main/res/xml/backup_rules.xml` 覆盖旧版备份规则；Android 12+ 通过 `android/app/src/main/res/xml/data_extraction_rules.xml` 对 `cloud-backup` 与 `device-transfer` 均排除 `domain="root"`。题库可通过题库包导出/导入迁移；该题库包不包含错题、成绩和收藏等学习状态。
 4. 若后续接后端，需要在 `capacitor.config.ts` 的 `server.allowNavigation` 里放行 API 域名，或改用 `@capacitor/http`。
 5. 状态栏配色可用 `@capacitor/status-bar` 跟随主题切换。
 

@@ -8,8 +8,8 @@ export interface BrandConfig {
 }
 
 export const DEFAULT_BRAND: BrandConfig = {
-  productName: '题屿',
-  productEn: 'TIYU BANK',
+  productName: '题匣',
+  productEn: 'QuizChest',
   logoMark: '题',
   accent: '#a8442a',
   accentSoft: '#f3e3dc',

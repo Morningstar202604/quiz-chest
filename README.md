@@ -1,4 +1,4 @@
-# 题屿 · 万象题库
+# 题匣 · QuizChest
 
 本地优先的题库应用：导入自有题库，离线完成练习、限时模拟考试、错题复习与学习统计。项目采用 React 19 + TypeScript + Vite，无账号、无后端，学习数据与导入题库保存在本机；同一份前端源码可构建为 Web/PWA、Windows 桌面端（Tauri）和 Android 应用（Capacitor）。
 

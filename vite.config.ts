@@ -11,8 +11,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['icons/favicon.svg', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
-        name: '题屿 · 万象题库',
-        short_name: '题屿',
+        name: '题匣 · QuizChest',
+        short_name: '题匣',
         description: '导入自有题库，离线完成练习、模拟考试、错题复习与学习统计',
         lang: 'zh-CN',
         theme_color: '#f4f0e7',

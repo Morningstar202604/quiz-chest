@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.tiyu.questionbank',
-  appName: '题屿',
+  appName: '题匣',
   webDir: 'dist',
   android: {
     allowMixedContent: false,

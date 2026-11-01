@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "题屿 · 万象题库",
+        "title": "题匣 · QuizChest",
         "width": 1280,
         "height": 860,
         "resizable": true,

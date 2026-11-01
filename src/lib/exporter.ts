@@ -89,7 +89,7 @@ export function parseExportPackage(raw: string): ParsePackageResult {
   }
   const pkg = data as Partial<ExportPackage> & { bank?: Record<string, unknown> }
   if (pkg.format !== BANK_PACKAGE_FORMAT || typeof pkg.bank !== 'object' || pkg.bank === null) {
-    return { bank: null, error: '不是题屿题库包（缺少 tiyu-bank 标识）', warnings: [], version: null }
+    return { bank: null, error: '不是题匣题库包（缺少 tiyu-bank 标识）', warnings: [], version: null }
   }
 
   const rawVersion = typeof pkg.version === 'number' ? pkg.version : BANK_PACKAGE_MIN_VERSION
